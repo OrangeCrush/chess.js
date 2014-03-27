@@ -13,7 +13,7 @@
  * initialPos
  */
 function Piece(init){
-   this.name = '';
+   this.name = 'P';
    this.xpos = init.xpos;
    this.ypos = init.ypos;
    this.initialPos = true;
@@ -22,33 +22,37 @@ function Piece(init){
 Piece.prototype.move = function(){
 }
 
+Piece.prototype.toString = function(){
+   return this.name;
+}
+
 
 function Knight(init){
-   Piece.call(this,init);
+   Piece.call(this, init);
    this.name = 'N';
 }
 
 
 
 function Bishop(init){
-   Piece.call(this,init);
+   Piece.call(this, init);
    this.name = 'B';
 }
 
 function Rook(init){
-   Piece.call(this,init);
+   Piece.call(this, init);
    this.name = 'R';
 }
 
 
 function Queen(init){
-   Piece.call(this,init);
+   Piece.call(this, init);
    this.name = 'Q';
 }
 
 
 function King(init){
-   Piece.call(this,init);
+   Piece.call(this, init);
    this.name = 'K';
 }
 
