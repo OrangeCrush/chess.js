@@ -1,0 +1,15 @@
+# humanstxt.org/
+# The humans responsible & technology colophon
+
+# TEAM
+
+   Max Friederichs -- Vigilante bad ass -- @Maxwell__F  -- Github: OrangeCrush
+
+# THANKS
+
+    Mom
+
+# TECHNOLOGY COLOPHON
+
+    HTML5, CSS3
+    Normalize.css, jQuery, Modernizr
