@@ -1,0 +1,6 @@
+{
+   "name":"chess.js",
+   "dependencies":{
+      "express": "latest"
+   }
+}
