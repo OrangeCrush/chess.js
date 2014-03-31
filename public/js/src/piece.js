@@ -141,18 +141,9 @@ King.prototype.movePattern = function(){
    return moves.filter(onBoard)
 }
 
-function extend(parent, child){
-   child.prototype = Object.create(parent.prototype);
-   child.prototype.constructor = child;
-}
-
 /*
  * Checks if space.x and space.y are on the chess board
  */
 function onBoard(space){
   return (0 <= space.x && space.x <= 7) && (0 <= space.y && space.y <= 7);
 }
-
-
-var whatever = new Queen({color:'white', xpos:4, ypos:4});
-console.log(whatever.movePattern());

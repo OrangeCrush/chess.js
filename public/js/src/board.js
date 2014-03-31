@@ -60,11 +60,6 @@ function buildPieceByCol(col, init){
    }
 }
 
-/*
- * Useful to instantiate a class when you just have the
- * class name
- */
-
 var lol = new Board();
 lol.newGame();
 
