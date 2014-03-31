@@ -11,6 +11,8 @@ Board.prototype.clearBoard = function(){
    for(var i = 0 ; i < 8; i++){
       this.board[i] = new Array(8);
    }
+   this.white = {};
+   this.white = {};
 }
 
 Board.prototype.newGame = function(){
@@ -28,7 +30,7 @@ Board.prototype.newGame = function(){
 }
 
 Board.prototype.toString = function(){
-   var rval = '';
+   var rval = '\n';
    for(var i=0; i < 8; i ++){
       for(var j = 0; j < 8; j++){
          if(this.board[i][j]){
@@ -60,7 +62,73 @@ function buildPieceByCol(col, init){
    }
 }
 
-var lol = new Board();
-lol.newGame();
+/*
+ * The big daddy.  Process a move.
+ *
+ * Return true or false-> whether or not the move is allowed.
+ * the change is made only if the function returns true.
+ */
+Board.prototype.processMove = function(pgn){
+   if(!isPGNCastle(pgn)){
+      var spot_from = pgn.match(/([a-z0-9]+)[x-]/i)[1]
+      if(isPieceAtPGNsqr.call(this, spot_from)){
+         
+      }
+      else{
+         if(canCastle(pgn)){
 
-console.log(lol.toString())
+         }
+      }
+}
+
+function isPieceAtPGNsqr(spot){
+   var piece_type = spot[0];
+   var board_column = letters[spot[1]];
+   var board_row = +spot[2] - 1;
+   var piece_from = this.board[board_row][board_column];
+
+   // Check if the piece is what it says it is
+   return piece_from.name === piece_type;
+}
+
+function isPGNCastle(pgn){
+   return pgn === 'O-O-O' || pgn === 'O-O';
+}
+
+function canPieceMoveTo(piece, dest){
+   
+}
+
+function isPieceBlockedFromSqr(){
+
+}
+
+function isCheck(){
+
+}
+
+function isCheckMate(){
+
+}
+
+/*
+*
+*/
+function canCastle(pgn){
+
+}
+
+var letters = {
+   a:0,
+   b:1,
+   c:2,
+   d:3,
+   e:4,
+   f:5,
+   g:6,
+   h:7
+}
+
+var b = new Board();
+b.newGame();
+console.log(b.toString());
