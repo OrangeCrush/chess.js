@@ -1,11 +1,24 @@
 function Game(){
    this.board = new Board();
-   this.black = this.white = [];
-   this.blackKing = this.whiteKing = null;
+   this.white = [];
+   this.black = [];
+
+   this.blackKing = null;
+   this.whiteKing = null;
+
+   this.blackCheck = false;
+   this.whiteCheck = false;
+
+   this.turn = 'white';
+   this.whiteCastle = false;
+   this.blackCastle = false;
+
+   this.newGame();
 }
 
 Game.prototype.newGame = function(){
-   this.black = this.white = [];
+   this.black = [];
+   this.white = [];
    for(var i = 0; i < 8; i++){
 
       var b1 = buildPieceByCol(i, {xpos: i, ypos: 7});
@@ -19,10 +32,15 @@ Game.prototype.newGame = function(){
       this.black.push(b0);
       this.black.push(b1);
 
-      this.board.squares[0][i] = {occupied: true, piece: w0}; 
-      this.board.squares[1][i] = {occupied: true, piece: w1};
-      this.board.squares[6][i] = {occupied: true, piece: b0};
-      this.board.squares[7][i] = {occupied: true, piece: b1};
+      this.board.squares[i][0].occupied = true;
+      this.board.squares[i][1].occupied = true;
+      this.board.squares[i][6].occupied = true;
+      this.board.squares[i][7].occupied = true;
+
+      this.board.squares[i][0].piece = w0; 
+      this.board.squares[i][1].piece = w1;
+      this.board.squares[i][6].piece = b0;
+      this.board.squares[i][7].piece = b1;
 
       if(w0.toString() === 'K')
          this.whiteKing = w0;
@@ -31,68 +49,132 @@ Game.prototype.newGame = function(){
    }
 }
 
-Game.prototype.validateMove = function(pngMove){
+/*
+ * validates a chess move based on the state of the game.
+ * Accepts moves in Portable Game Notation.
+ * team ::= /(black|white)/
+ */
+Game.prototype.validateMove = function(pgnMove, team){
+   try{
+      if(pgnMove === 'O-O-O' || pgnMove === 'O-O'){
+         return canCastle();
+      }
+      var sqr_from = pgnSqrToCoords(spot_from);
+      spots = pgnMove.split(/[x-]/i);
+      spot_from = spot[0];
+      spot_to = spot[1];
 
-}
-
-function buildPieceByCol(col, init){
-   switch(col){
-      case 0:
-      case 7:
-         return new Rook(init);
-      case 1:
-      case 6:
-         return new Knight(init);
-      case 2:
-      case 5:
-         return new Bishop(init);
-      case 3:
-         return new Queen(init);
-      case 4:
-         return new King(init);
+      //Validate the move is on the board
+      if(onBoard(pgnSqrToCoords(spot_from)) && onBoard(pgnSqrToCoords(spot_to))){
+         //Check that there is a piece at the sqr you are moving from
+         if(this.board.squaress[sqr_from.x][sqr_from.y].occupied){
+            is_capture = pgnMove.indexOf('x');
+         }else{
+            return false;
+         }
+      }else{
+         return false;
+      }
+   }catch(ex){
+      return false;
    }
 }
 
-function isPieceAtPGNsqr(spot){
-   var piece_type = spot[0];
-   var board_column = letters[spot[1]];
-   var board_row = +spot[2] - 1;
-   var piece_from = this.board.squares[board_row][board_column];
-
-   // Check if the piece is what it says it is
-   return piece_from.name === piece_type;
-}
-
-function isPGNCastle(pgn){
-   return pgn === 'O-O-O' || pgn === 'O-O';
-}
-
-function canPieceMoveTo(piece, dest){
-   
-}
-
-function isCheck(){
-
-}
-
-function isCheckMate(){
-
+/*
+ * Checks if team can castle
+ * There are a number of cases when castling is not permitted.
+ *   [x] Your king has been moved earlier in the game.
+ *   [x] The rook that castles has been moved earlier in the game.
+ *   [x] There are pieces standing between your king and rook.
+ *   [x] The king is in check.
+ *   [_] The king moves through a square that is attacked by a piece of the opponent.
+ *   [_] The king would be in check after castling.
+ *   http://www.chessvariants.org/d.chess/castlefaq.html
+ */
+Game.prototype.canCastle = function(pgn, team){
+   var king, rook, canCastle;
+   if(team === 'black'){
+      king = this.blackKing;
+      canCastle = this.blackCastle;
+   }else if(team == 'white'){
+      king = this.whiteKing;
+      canCastle = this.whiteCastle;
+   }else{
+      throw 'Team passed to canCastle does not match /(black|white)/';
+   }
+   if(king.initialPos && canCastle){
+      if(pgn === 'O-O-O'){ //Queenside
+         if(team === 'black'){
+            rook = this.board.squares[0][7].piece;
+            return rook.initialPos && !this.blackCheck &&
+               !this.board.squares[1][7].occupied &&
+               !this.board.squares[2][7].occupied &&
+               !this.board.squares[3][7].occupied;
+         }else{
+            rook = this.board.squares[0][0].piece;
+            return rook.initialPos && !this.whiteCheck && 
+               !this.board.squares[1][0].occupied &&
+               !this.board.squares[2][0].occupied &&
+               !this.board.squares[3][0].occupied;
+         }
+      }else if(pgn === 'O-O'){ //Kingside
+         if(team === 'black'){
+            rook = this.board.squares[7][7].piece;
+            return rook.initialPos && !this.blackCheck &&
+               !this.board.squares[6][7].occupied &&
+               !this.board.squares[5][7].occupied;
+         }else{
+            rook = this.board.squares[7][0].piece;
+            return rook.initialPos && !this.whiteCheck &&
+               !this.board.squares[6][0].occupied &&
+               !this.board.squares[5][0].occupied;
+         }
+      }else{
+         throw 'PGN not valid in canCastle';
+      }
+   }else{
+      return false; //king has moved
+   }
 }
 
 /*
-*
-*/
-function canCastle(pgn){
+ * Changes the state of a game (After validation..)
+ * Assume validation has passed already
+ */
+Game.prototype.processMove = function(pgn, team){
+   if(pgn !== 'O-O-O' || pgn !== 'O-O'){
+      var spots = pgn.split(/[x-]/i);
+      var coord_from = pgnSqrToCoords(spots[0]);
+      var coord_to = pgnSqrToCoords(spots[1]);
 
+      var sqr_from = this.board.squares[coord_from.x][coord_from.y];
+      var sqr_to   = this.board.squares[coord_to.x][coord_to.y];
+
+      this.movePiece(sqr_from, sqr_to);
+
+   }else{//castle move
+      if(team === 'black'){
+         this.blackCastle = false;      
+         //..left off here TODO
+      }else{
+         this.whiteCastle = false;      
+      }
+   }
 }
 
-var letters = {
-   a:0,
-   b:1,
-   c:2,
-   d:3,
-   e:4,
-   f:5,
-   g:6,
-   h:7
+/*
+ * Just copy things over.
+ * Do a shallow copy on the piece.
+ * Update things
+ */
+Game.prototype.movePiece = function(sqr_from, sqr_to){
+      sqr_to.piece = sqr_from.piece;
+      sqr_to.occupied = true;
+
+      sqr_to.piece.initialPos = false;
+      sqr_to.piece.xpos  = sqr_to.x;
+      sqr_to.piece.ypos  = sqr_to.y;
+
+      sqr_from.piece = null;
+      sqr_from.occupied = false;
 }

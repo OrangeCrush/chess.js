@@ -141,9 +141,3 @@ King.prototype.movePattern = function(){
    return moves.filter(onBoard)
 }
 
-/*
- * Checks if space.x and space.y are on the chess board
- */
-function onBoard(space){
-  return (0 <= space.x && space.x <= 7) && (0 <= space.y && space.y <= 7);
-}
