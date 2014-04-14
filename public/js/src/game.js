@@ -10,8 +10,8 @@ function Game(){
    this.whiteCheck = false;
 
    this.turn = 'white';
-   this.whiteCastle = false;
-   this.blackCastle = false;
+   this.whiteCastle = true;
+   this.blackCastle = true;
 
    this.newGame();
 }
@@ -142,7 +142,7 @@ Game.prototype.canCastle = function(pgn, team){
  * Assume validation has passed already
  */
 Game.prototype.processMove = function(pgn, team){
-   if(pgn !== 'O-O-O' || pgn !== 'O-O'){
+   if(pgn !== 'O-O-O' && pgn !== 'O-O'){
       var spots = pgn.split(/[x-]/i);
       var coord_from = pgnSqrToCoords(spots[0]);
       var coord_to = pgnSqrToCoords(spots[1]);
@@ -153,12 +153,18 @@ Game.prototype.processMove = function(pgn, team){
       this.movePiece(sqr_from, sqr_to);
 
    }else{//castle move
+      var king, rook_sqr;
       if(team === 'black'){
          this.blackCastle = false;      
-         //..left off here TODO
+         king = this.blackKing;
+         rook_sqr = pgn === 'O-O-O' ? this.board.squares[0][7] : this.board.squares[7][7];
       }else{
          this.whiteCastle = false;      
+         king = this.whiteKing;
+         rook_sqr = pgn === 'O-O-O' ? this.board.squares[0][0] : this.board.squares[7][0];
       }
+      king_sqr = this.getSqrForPiece(king);
+      this.swapPiece(king_sqr, rook_sqr);
    }
 }
 
@@ -166,8 +172,10 @@ Game.prototype.processMove = function(pgn, team){
  * Just copy things over.
  * Do a shallow copy on the piece.
  * Update things
+ * returns the piece that was destroyed (null if not)
  */
 Game.prototype.movePiece = function(sqr_from, sqr_to){
+      var captured = sqr_to.piece; //TODO for now just to be cute but this needs to be a deep copy
       sqr_to.piece = sqr_from.piece;
       sqr_to.occupied = true;
 
@@ -177,4 +185,19 @@ Game.prototype.movePiece = function(sqr_from, sqr_to){
 
       sqr_from.piece = null;
       sqr_from.occupied = false;
+      return captured;
+}
+
+/*
+ * Basically needed for catling.
+ */
+Game.prototype.swapPiece = function(sqr1, sqr2){
+   var temp = sqr1.piece;
+   sqr1.piece = sqr2.piece;
+   sqr2.piece = temp;
+}
+
+
+Game.prototype.getSqrForPiece = function(piece){
+   return this.board.squares[piece.xpos][piece.ypos];
 }

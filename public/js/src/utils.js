@@ -72,4 +72,3 @@ function errMsg(code, msg, loc){
       location: 'In: ' + loc
    }
 }
-
