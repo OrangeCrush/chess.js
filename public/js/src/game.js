@@ -195,6 +195,8 @@ Game.prototype.swapPiece = function(sqr1, sqr2){
    var temp = sqr1.piece;
    sqr1.piece = sqr2.piece;
    sqr2.piece = temp;
+
+   sqr2.piece.initialPos = sqr1.piece.initialPos = false;
 }
 
 
