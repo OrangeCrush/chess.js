@@ -72,3 +72,13 @@ function errMsg(code, msg, loc){
       location: 'In: ' + loc
    }
 }
+
+
+function isSqrInAry(ary, sqr){
+   for(var i =0; i < ary.length; i++){
+      if(ary[i].x === sqr.x && ary[i].y === sqr.y){
+         return true;
+      }
+   }
+   return false;
+}

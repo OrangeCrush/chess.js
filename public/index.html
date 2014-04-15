@@ -22,17 +22,10 @@
         <![endif]-->
 
         <!-- Add your site or application content here -->
-        <table>
-           <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-           <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-           <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-           <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-           <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-           <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-           <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-           <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-           <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-        </table>
+        <input id='pgn' type='text' /><input id='move' type='submit' value='Move'/>
+        <div id='msgBox'></div>
+        <div id='game'></div>
+
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.2.min.js"><\/script>')</script>
@@ -50,6 +43,21 @@
             e.src='//www.google-analytics.com/analytics.js';
             r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
             ga('create','UA-XXXXX-X');ga('send','pageview');
+        </script>
+        <script>
+            var g = new Game();
+            document.getElementById("game").innerHTML = g.board.toHtmlTable();
+            document.getElementById("move").onclick = function(e){
+               e.preventDefault(); 
+               var pgn = document.getElementById("pgn").value;
+               var rval = g.validateMove(pgn, g.turn);
+               if(rval.valid){
+                  g.processMove(pgn, g.turn);
+               }else{
+                  document.getElementById("msgBox").innerHTML = '<b>Invalid Move: ' + rval.desc + '</b>';
+               }
+               document.getElementById("game").innerHTML = g.board.toHtmlTable();
+            }
         </script>
     </body>
 </html>

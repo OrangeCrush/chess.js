@@ -39,3 +39,34 @@ Board.prototype.toString = function(){
    }
    return rval;
 }
+
+Board.prototype.toHtmlTable = function(){
+   var html = '<table>\n' + 
+                  '<thead>\n' + 
+                     '<tr>\n' + 
+                        '<th></th> \n' + 
+                        '<th>a</th> \n' + 
+                        '<th>b</th> \n' + 
+                        '<th>c</th> \n' + 
+                        '<th>d</th> \n' + 
+                        '<th>e</th> \n' + 
+                        '<th>f</th> \n' + 
+                        '<th>g</th> \n' + 
+                        '<th>h</th> \n' + 
+                     '</tr>\n' + 
+                  '</thead>\n' + 
+                  '<tbody>';
+   for(var i = 7; i >= 0; i--){
+      html += '<tr>\n';
+      html += '<td><b>' + (i + 1) + '</b></td>\n';
+      for(var j = 0; j < 8; j++){
+         if(this.squares[j][i].occupied){
+            html += '<td>' + this.squares[j][i].piece.toString() + '&nbsp;</td>';
+         }else{
+            html += '<td>&nbsp;&nbsp</td>';
+         }
+      }
+      html += '</tr>\n';
+   }
+   return html + '</tbody>\n</table>';
+}

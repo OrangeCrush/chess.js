@@ -1,11 +1,14 @@
 function Game(){
    this.board = new Board();
+   this.teamTurn = ['white', 'black'];
    this.newGame();
 }
+
 
 Game.prototype.newGame = function(){
    this.board = new Board();
 
+   this.turnCount = 1;
    this.blackKing = null;
    this.whiteKing = null;
 
@@ -26,10 +29,8 @@ Game.prototype.newGame = function(){
       var w1 = new Piece({xpos:i, ypos:1});
       var w0 = buildPieceByCol(i, {xpos: i, ypos: 0});
 
-      this.white.push(w0);
-      this.white.push(w1);
-      this.black.push(b0);
-      this.black.push(b1);
+      this.white.push(w0, w1);
+      this.black.push(b0, b1);
 
       this.board.squares[i][0].occupied = true;
       this.board.squares[i][1].occupied = true;
@@ -52,30 +53,40 @@ Game.prototype.newGame = function(){
  * validates a chess move based on the state of the game.
  * Accepts moves in Portable Game Notation.
  * team ::= /(black|white)/
+ *
+ * returns ::= {
+ *    valid: t/f,
+ *    desc: "why"
+ * }
  */
 Game.prototype.validateMove = function(pgnMove, team){
    try{
       if(pgnMove === 'O-O-O' || pgnMove === 'O-O'){
-         return canCastle();
+         return {valid: canCastle(), desc:'Based on canCastle'};
       }
-      var sqr_from = pgnSqrToCoords(spot_from);
-      spots = pgnMove.split(/[x-]/i);
-      spot_from = spot[0];
-      spot_to = spot[1];
+      var spots = pgnMove.split(/[x-]/i);
+      var spot_from = pgnSqrToCoords(spots[0]);
+      var spot_to = pgnSqrToCoords(spots[1]);
 
       //Validate the move is on the board
-      if(onBoard(pgnSqrToCoords(spot_from)) && onBoard(pgnSqrToCoords(spot_to))){
+      if(onBoard(spot_from) && onBoard(spot_to)){
          //Check that there is a piece at the sqr you are moving from
-         if(this.board.squaress[sqr_from.x][sqr_from.y].occupied){
-            is_capture = pgnMove.indexOf('x');
+         if(this.board.squares[spot_from.x][spot_from.y].occupied){
+            var piece = this.getPieceFromCoord(spot_from.x, spot_from.y);
+            var moveSquares = this.getMoveSquaresForPiece(piece, team);
+            if(isSqrInAry(moveSquares, spot_to)){
+               return {valid: true, desc:'Go for it kid'}; //As long as moveSqrs fns handle check i think this is O.K.
+            }else{
+               return {valid: false, desc:"Move wasn't in moveSquares."};
+            }
          }else{
-            return false;
+            return {valid: false, desc:'No piece where you started'}
          }
       }else{
-         return false;
+         return {valid: false, desc: 'Move not on board'}
       }
    }catch(ex){
-      return false;
+      return {valid: false, desc: 'Exception: \n' + ex.message}
    }
 }
 
@@ -166,6 +177,8 @@ Game.prototype.processMove = function(pgn, team){
       king_sqr = this.getSqrForPiece(king);
       this.swapPiece(king_sqr, rook_sqr);
    }
+
+   this.turn = this.teamTurn[++this.turnCount % 2];
    return captured;
 }
 
@@ -191,6 +204,7 @@ Game.prototype.movePiece = function(sqr_from, sqr_to){
 
 /*
  * Basically needed for catling.
+ * TODO LMAO this is not how you castle wtf was i thinking
  */
 Game.prototype.swapPiece = function(sqr1, sqr2){
    var temp = sqr1.piece;
@@ -200,6 +214,125 @@ Game.prototype.swapPiece = function(sqr1, sqr2){
    sqr2.piece.initialPos = sqr1.piece.initialPos = false;
 }
 
+
+/*
+ * Returns a set of moves that could be made by a piece
+ * [x] Filters on Pieces in the way
+ * [x] Filters on Squares off the board
+ * [_] Filters on Check
+ * [_] Filters on Checkmate
+ * [_] Filters on Pieces that block Checkmate
+ * [_] Adds Castling Moves
+ */
+Game.prototype.getMoveSquaresForPiece = function(piece, team){
+   var squares = [];
+   var x = piece.xpos;
+   var y = piece.ypos;
+   switch(piece.name){
+      case 'P':
+         var teamFactor = team === 'black' ? -1 : 1;
+         if(!this.board.squares[x][y + 1 * teamFactor].occupied){
+            squares.push(this.board.squares[x][y + 1 * teamFactor])
+         }
+
+         //check the diagonals for a capture
+         if(this.board.squares[x + 1][y + 1 * teamFactor].occupied){
+            squares.push(this.board.squares[x][y + 1 * teamFactor])
+         }
+
+         if(this.board.squares[x - 1][y + 1 * teamFactor].occupied){
+            squares.push(this.board.squares[x][y + 1 * teamFactor])
+         }
+
+         //If the pawn hasn't moved yet, let it move two
+         if(piece.initialPos && !this.board.squares[x][y + 2 * teamFactor].occupied){
+            squares.push(this.board.squares[x][y + 2 * teamFactor])
+         }
+      break;
+      case 'R':
+         squares = this.marchUntilPiece(piece, {up_down: true, diag: false}, 8);
+      break;
+      case 'B':
+         squares = this.marchUntilPiece(piece, {up_down: false, diag: true}, 8);
+      break;
+      case 'N':
+         squares.push(this.board.squares[x + 2][y + 1]);
+         squares.push(this.board.squares[x + 2][y - 1]);
+         squares.push(this.board.squares[x - 2][y + 1]);
+         squares.push(this.board.squares[x - 2][y - 1]);
+         squares.push(this.board.squares[x + 1][y + 2]);
+         squares.push(this.board.squares[x + 1][y - 2]);
+         squares.push(this.board.squares[x - 1][y + 2]);
+         squares.push(this.board.squares[x - 1][y - 2]);
+      break;
+      case 'K':
+         squares = this.marchUntilPiece(piece, {up_down: true, diag: true}, 1);
+      break;
+      case 'Q':
+         squares = this.marchUntilPiece(piece, {up_down: true, diag: true}, 8);
+      break;
+
+   }
+   return squares.filter(onBoard);
+}
+
+/*
+ * Returns an array of pieces that are
+ * in the specified direction and not occupied 
+ * for n squares
+ * direction ::= {
+ *    up_down: t/f
+ *    diag: t/f
+ * }
+ */
+Game.prototype.marchUntilPiece = function(piece, direction, n){
+   squares = [];
+   var x = piece.xpos;
+   var y = piece.ypos;
+   if(direction.up_down){
+      //March Right
+      for(var i = 1; i <= n && onBoard({x: x + i, y:y}) && !this.board.squares[x + i][y].occupied; i++){
+         squares.push(this.board.squares[x + i][y]);
+      }
+      //March Left
+      for(var i = 1; i <= n && onBoard({x: x - i, y:y}) && !this.board.squares[x - i][y].occupied; i++){
+         squares.push(this.board.squares[x - i][y]);
+      }
+      //March Up
+      for(var i = 1; i < n && onBoard({x: x, y: y + i}) && !this.board.squares[x][y + i].occupied; i++){
+         squares.push(this.board.squares[x][y + i]);
+      }
+      //March Down
+      for(var i = 1; i <= n && onBoard({x: x, y: y - i}) && !this.board.squares[x][y - i].occupied; i++){
+         squares.push(this.board.squares[x][y - i]);
+      }
+   }
+   if(direction.diag){
+      //March Up-Right
+      for(var i = 1; i <= n && onBoard({x: x + i, y: y + i}) && !this.board.squares[x + i][y + i].occupied; i++){
+         squares.push(this.board.squares[x + i][y + i]);
+      }
+      //March Up-Left
+      for(var i = 1; i <= n && onBoard({x: x - i, y: y + i}) && !this.board.squares[x - i][y + i].occupied; i++){
+         squares.push(this.board.squares[x - i][y + i]);
+      }
+      //March Down-Left
+      for(var i = 1; i <= n && onBoard({x: x - i, y: y - i}) && !this.board.squares[x - i][y - i].occupied; i++){
+         squares.push(this.board.squares[x - i][y - i]);
+      }
+      //March Down-Right
+      for(var i = 1; i <= n && onBoard({x: x + i, y: y - i}) && !this.board.squares[x + i][y - i].occupied; i++){
+         squares.push(this.board.squares[x + i][y - i]);
+      }
+   }
+   return squares;
+}
+
+
 Game.prototype.getSqrForPiece = function(piece){
    return this.board.squares[piece.xpos][piece.ypos];
+}
+
+Game.prototype.getPieceFromCoord = function(x,y){
+   return this.board.squares[x][y].piece;
 }
