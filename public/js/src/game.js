@@ -1,11 +1,16 @@
 function Game(){
    this.board = new Board();
-   this.white = [];
-   this.black = [];
+   this.newGame();
+}
+
+Game.prototype.newGame = function(){
+   this.board = new Board();
 
    this.blackKing = null;
    this.whiteKing = null;
 
+   this.black = [];
+   this.white = [];
    this.blackCheck = false;
    this.whiteCheck = false;
 
@@ -13,12 +18,6 @@ function Game(){
    this.whiteCastle = true;
    this.blackCastle = true;
 
-   this.newGame();
-}
-
-Game.prototype.newGame = function(){
-   this.black = [];
-   this.white = [];
    for(var i = 0; i < 8; i++){
 
       var b1 = buildPieceByCol(i, {xpos: i, ypos: 7});
@@ -142,6 +141,7 @@ Game.prototype.canCastle = function(pgn, team){
  * Assume validation has passed already
  */
 Game.prototype.processMove = function(pgn, team){
+   var captured;
    if(pgn !== 'O-O-O' && pgn !== 'O-O'){
       var spots = pgn.split(/[x-]/i);
       var coord_from = pgnSqrToCoords(spots[0]);
@@ -150,7 +150,7 @@ Game.prototype.processMove = function(pgn, team){
       var sqr_from = this.board.squares[coord_from.x][coord_from.y];
       var sqr_to   = this.board.squares[coord_to.x][coord_to.y];
 
-      this.movePiece(sqr_from, sqr_to);
+      captured = this.movePiece(sqr_from, sqr_to);
 
    }else{//castle move
       var king, rook_sqr;
@@ -166,6 +166,7 @@ Game.prototype.processMove = function(pgn, team){
       king_sqr = this.getSqrForPiece(king);
       this.swapPiece(king_sqr, rook_sqr);
    }
+   return captured;
 }
 
 /*
@@ -175,7 +176,7 @@ Game.prototype.processMove = function(pgn, team){
  * returns the piece that was destroyed (null if not)
  */
 Game.prototype.movePiece = function(sqr_from, sqr_to){
-      var captured = sqr_to.piece; //TODO for now just to be cute but this needs to be a deep copy
+      var captured = sqr_to.piece;
       sqr_to.piece = sqr_from.piece;
       sqr_to.occupied = true;
 
@@ -198,7 +199,6 @@ Game.prototype.swapPiece = function(sqr1, sqr2){
 
    sqr2.piece.initialPos = sqr1.piece.initialPos = false;
 }
-
 
 Game.prototype.getSqrForPiece = function(piece){
    return this.board.squares[piece.xpos][piece.ypos];
