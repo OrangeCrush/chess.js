@@ -8,7 +8,7 @@ function Game(){
 Game.prototype.newGame = function(){
    this.board = new Board();
 
-   this.turnCount = 1;
+   this.turnCount = 0;
    this.blackKing = null;
    this.whiteKing = null;
 
