@@ -62,7 +62,8 @@ Game.prototype.validateMove = function(pgnMove, team){
    try{
       if(team === this.turn ){
          if(pgnMove === 'O-O-O' || pgnMove === 'O-O'){
-            return {valid: canCastle(), desc:'Based on canCastle'};
+            var valid = this.canCastle(pgnMove, team);
+            return {valid: valid, desc: valid ? 'Nice Castle; man.' : 'Can Not Castle'};
          }
          var spots = pgnMove.split(/[x-]/i);
          var spot_from = pgnSqrToCoords(spots[0]);
@@ -81,19 +82,19 @@ Game.prototype.validateMove = function(pgnMove, team){
                      return {valid: false, desc:"Move wasn't in moveSquares."};
                   }
                }else{
-                  return {valid: false, desc:'The piece moved belongs to the other team.'}
+                  return {valid: false, desc:'The piece moved belongs to the other team.'};
                }
             }else{
-               return {valid: false, desc:'No piece where you started'}
+               return {valid: false, desc:'No piece where you started'};
             }
          }else{
-            return {valid: false, desc: 'Move not on board'}
+            return {valid: false, desc: 'Move not on board'};
          }
       }else{
-            return {valid: false, desc: "It's not " + team  + "'s move."}
+            return {valid: false, desc: "It's not " + team  + "'s move."};
       }
    }catch(ex){
-      return {valid: false, desc: 'Exception: \n' + ex.message}
+      return {valid: false, desc: 'Exception: \n' + ex.message};
    }
 }
 
@@ -113,7 +114,7 @@ Game.prototype.canCastle = function(pgn, team){
    if(team === 'black'){
       king = this.blackKing;
       canCastle = this.blackCastle;
-   }else if(team == 'white'){
+   }else if(team === 'white'){
       king = this.whiteKing;
       canCastle = this.whiteCastle;
    }else{
