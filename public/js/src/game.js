@@ -1,6 +1,5 @@
 function Game(){
    this.board = new Board();
-   this.teamTurn = ['white', 'black'];
    this.newGame();
 }
 
@@ -23,11 +22,11 @@ Game.prototype.newGame = function(){
 
    for(var i = 0; i < 8; i++){
 
-      var b1 = buildPieceByCol(i, {xpos: i, ypos: 7});
-      var b0 = new Piece({xpos:i, ypos:6});
+      var b1 = buildPieceByCol(i, {xpos: i, ypos: 7, color: 'black'});
+      var b0 = new Piece({xpos:i, ypos:6, color: 'black'});
 
-      var w1 = new Piece({xpos:i, ypos:1});
-      var w0 = buildPieceByCol(i, {xpos: i, ypos: 0});
+      var w1 = new Piece({xpos:i, ypos:1, color: 'white'});
+      var w0 = buildPieceByCol(i, {xpos: i, ypos: 0, color: 'white'});
 
       this.white.push(w0, w1);
       this.black.push(b0, b1);
@@ -61,29 +60,37 @@ Game.prototype.newGame = function(){
  */
 Game.prototype.validateMove = function(pgnMove, team){
    try{
-      if(pgnMove === 'O-O-O' || pgnMove === 'O-O'){
-         return {valid: canCastle(), desc:'Based on canCastle'};
-      }
-      var spots = pgnMove.split(/[x-]/i);
-      var spot_from = pgnSqrToCoords(spots[0]);
-      var spot_to = pgnSqrToCoords(spots[1]);
+      if(team === this.turn ){
+         if(pgnMove === 'O-O-O' || pgnMove === 'O-O'){
+            return {valid: canCastle(), desc:'Based on canCastle'};
+         }
+         var spots = pgnMove.split(/[x-]/i);
+         var spot_from = pgnSqrToCoords(spots[0]);
+         var spot_to = pgnSqrToCoords(spots[1]);
 
-      //Validate the move is on the board
-      if(onBoard(spot_from) && onBoard(spot_to)){
-         //Check that there is a piece at the sqr you are moving from
-         if(this.board.squares[spot_from.x][spot_from.y].occupied){
-            var piece = this.getPieceFromCoord(spot_from.x, spot_from.y);
-            var moveSquares = this.getMoveSquaresForPiece(piece, team);
-            if(isSqrInAry(moveSquares, spot_to)){
-               return {valid: true, desc:'Go for it kid'}; //As long as moveSqrs fns handle check i think this is O.K.
+         //Validate the move is on the board
+         if(onBoard(spot_from) && onBoard(spot_to)){
+            //Check that there is a piece at the sqr you are moving from
+            if(this.board.squares[spot_from.x][spot_from.y].occupied){
+               var piece = this.getPieceFromCoord(spot_from.x, spot_from.y);
+               if(piece.color === this.turn){
+                  var moveSquares = this.getMoveSquaresForPiece(piece, team);
+                  if(isSqrInAry(moveSquares, spot_to)){
+                     return {valid: true, desc:'Go for it kid'}; //As long as moveSqrs fns handle check i think this is O.K.
+                  }else{
+                     return {valid: false, desc:"Move wasn't in moveSquares."};
+                  }
+               }else{
+                  return {valid: false, desc:'The piece moved belongs to the other team.'}
+               }
             }else{
-               return {valid: false, desc:"Move wasn't in moveSquares."};
+               return {valid: false, desc:'No piece where you started'}
             }
          }else{
-            return {valid: false, desc:'No piece where you started'}
+            return {valid: false, desc: 'Move not on board'}
          }
       }else{
-         return {valid: false, desc: 'Move not on board'}
+            return {valid: false, desc: "It's not " + team  + "'s move."}
       }
    }catch(ex){
       return {valid: false, desc: 'Exception: \n' + ex.message}
@@ -175,10 +182,12 @@ Game.prototype.processMove = function(pgn, team){
          rook_sqr = pgn === 'O-O-O' ? this.board.squares[0][0] : this.board.squares[7][0];
       }
       king_sqr = this.getSqrForPiece(king);
-      this.swapPiece(king_sqr, rook_sqr);
+      this.swapPiece(king_sqr, rook_sqr); //TODO not how this works lol...
    }
 
-   this.turn = this.teamTurn[++this.turnCount % 2];
+   this.turn = this.turn === 'white' ? 'black' : 'white';
+   this.turnCount++;
+
    return captured;
 }
 
@@ -329,10 +338,17 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
 }
 
 
+/*
+ * Returns the square that piece is on
+ */
 Game.prototype.getSqrForPiece = function(piece){
    return this.board.squares[piece.xpos][piece.ypos];
 }
 
+/*
+ * returns the piece that is on the square given by the 0-based coordinates x, y
+ * from whites perspective
+ */
 Game.prototype.getPieceFromCoord = function(x,y){
    return this.board.squares[x][y].piece;
 }
