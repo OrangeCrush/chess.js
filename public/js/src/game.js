@@ -231,22 +231,22 @@ Game.prototype.getMoveSquaresForPiece = function(piece, team){
    switch(piece.name){
       case 'P':
          var teamFactor = team === 'black' ? -1 : 1;
-         if(!this.board.squares[x][y + 1 * teamFactor].occupied){
-            squares.push(this.board.squares[x][y + 1 * teamFactor])
+         if(onBoard({x: x, y: + 1 * teamFactor}) && !this.board.squares[x][y + 1 * teamFactor].occupied){
+            squares.push(this.board.squares[x][y + 1 * teamFactor]);
          }
 
          //check the diagonals for a capture
-         if(this.board.squares[x + 1][y + 1 * teamFactor].occupied){
-            squares.push(this.board.squares[x][y + 1 * teamFactor])
+         if(onBoard({x: x + 1, y: y + 1 * teamFactor}) && this.board.squares[x + 1][y + 1 * teamFactor].occupied){
+            squares.push(this.board.squares[x + 1][y + 1 * teamFactor]);
          }
 
-         if(this.board.squares[x - 1][y + 1 * teamFactor].occupied){
-            squares.push(this.board.squares[x][y + 1 * teamFactor])
+         if(onBoard({x: x - 1, y: y + 1 * teamFactor}) && this.board.squares[x - 1][y + 1 * teamFactor].occupied){
+            squares.push(this.board.squares[x - 1][y + 1 * teamFactor]);
          }
 
          //If the pawn hasn't moved yet, let it move two
-         if(piece.initialPos && !this.board.squares[x][y + 2 * teamFactor].occupied){
-            squares.push(this.board.squares[x][y + 2 * teamFactor])
+         if(piece.initialPos && onBoard({x:x, y: y + 2 * teamFactor}) && !this.board.squares[x][y + 2 * teamFactor].occupied){
+            squares.push(this.board.squares[x][y + 2 * teamFactor]);
          }
       break;
       case 'R':
@@ -256,14 +256,14 @@ Game.prototype.getMoveSquaresForPiece = function(piece, team){
          squares = this.marchUntilPiece(piece, {up_down: false, diag: true}, 8);
       break;
       case 'N':
-         squares.push(this.board.squares[x + 2][y + 1]);
-         squares.push(this.board.squares[x + 2][y - 1]);
-         squares.push(this.board.squares[x - 2][y + 1]);
-         squares.push(this.board.squares[x - 2][y - 1]);
-         squares.push(this.board.squares[x + 1][y + 2]);
-         squares.push(this.board.squares[x + 1][y - 2]);
-         squares.push(this.board.squares[x - 1][y + 2]);
-         squares.push(this.board.squares[x - 1][y - 2]);
+         if(onBoard({x: x + 2, y: y + 1})) squares.push(this.board.squares[x + 2][y + 1]);
+         if(onBoard({x: x + 2, y: y - 1})) squares.push(this.board.squares[x + 2][y - 1]);
+         if(onBoard({x: x - 2, y: y + 1})) squares.push(this.board.squares[x - 2][y + 1]);
+         if(onBoard({x: x - 2, y: y - 1})) squares.push(this.board.squares[x - 2][y - 1]);
+         if(onBoard({x: x + 1, y: y + 2})) squares.push(this.board.squares[x + 1][y + 2]);
+         if(onBoard({x: x + 1, y: y - 2})) squares.push(this.board.squares[x + 1][y - 2]);
+         if(onBoard({x: x - 1, y: y + 2})) squares.push(this.board.squares[x - 1][y + 2]);
+         if(onBoard({x: x - 1, y: y - 2})) squares.push(this.board.squares[x - 1][y - 2]);
       break;
       case 'K':
          squares = this.marchUntilPiece(piece, {up_down: true, diag: true}, 1);
@@ -273,7 +273,7 @@ Game.prototype.getMoveSquaresForPiece = function(piece, team){
       break;
 
    }
-   return squares.filter(onBoard);
+   return squares;
 }
 
 /*
