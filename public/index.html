@@ -22,7 +22,8 @@
         <![endif]-->
 
         <!-- Add your site or application content here -->
-        <input id='pgn' type='text' /><input id='move' type='submit' value='Move'/>
+        
+        <form id ="moveForm"><input id='pgn' type='text' /><input id='move' type='submit' value='Move'/></form>
         <div id='msgBox'></div>
         <div id='game'></div>
         <div id='moves'></div>
@@ -51,6 +52,7 @@
             document.getElementById("moves").innerHTML = g.toHtmlTable();
             document.getElementById("move").onclick = function(e){
                e.preventDefault(); 
+               document.getElementById("msgBox").innerHTML = '';
                var pgn = document.getElementById("pgn").value;
                var rval = g.validateMove(pgn, g.turn);
                if(rval.valid){

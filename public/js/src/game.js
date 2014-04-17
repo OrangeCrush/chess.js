@@ -184,8 +184,13 @@ Game.prototype.processMove = function(pgn, team){
          king = this.whiteKing;
          rook_sqr = pgn === 'O-O-O' ? this.board.squares[0][0] : this.board.squares[7][0];
       }
-      king_sqr = this.getSqrForPiece(king);
-      this.swapPiece(king_sqr, rook_sqr); //TODO not how this works lol...
+      var ypos = king.ypos;
+      var king_newx = pgn === 'O-O' ? 6 : 2;
+      var rook_newx = pgn === 'O-O' ? 5 : 3;
+
+      this.movePiece(this.getSqrForPiece(king), this.board.squares[king_newx][ypos]);
+      this.movePiece(rook_sqr, this.board.squares[rook_newx][ypos]);
+
    }
 
    this.turn = this.turn === 'white' ? 'black' : 'white';
@@ -244,7 +249,7 @@ Game.prototype.getMoveSquaresForPiece = function(piece, team){
    switch(piece.name){
       case 'P':
          var teamFactor = team === 'black' ? -1 : 1;
-         if(onBoard({x: x, y: + 1 * teamFactor}) && !this.board.squares[x][y + 1 * teamFactor].occupied){
+         if(onBoard({x: x, y: y + 1 * teamFactor}) && !this.board.squares[x][y + 1 * teamFactor].occupied){
             squares.push(this.board.squares[x][y + 1 * teamFactor]);
          }
 
@@ -381,4 +386,18 @@ Game.prototype.toHtmlTable = function(){
    }
 
    return html + '</tbody>\n</table>';
+}
+
+/*
+ * Used for testing and in Ai's
+ */
+Game.prototype.runMoves = function(pgnAry){
+   for(var i = 0; i < pgnAry.length; i++){
+      var err;
+      if(err = this.validateMove(pgnAry[i], this.turn)){
+         this.processMove(pgnAry[i], this.turn);
+      }else{
+         throw pgnAry[i] + ' was an invalid move: ' + err;
+      }
+   }
 }
