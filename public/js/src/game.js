@@ -8,6 +8,8 @@ Game.prototype.newGame = function(){
    this.board = new Board();
 
    this.turnCount = 0;
+   this.moves = [];
+
    this.blackKing = null;
    this.whiteKing = null;
 
@@ -41,9 +43,9 @@ Game.prototype.newGame = function(){
       this.board.squares[i][6].piece = b0;
       this.board.squares[i][7].piece = b1;
 
-      if(w0.toString() === 'K')
+      if(w0.name === 'K')
          this.whiteKing = w0;
-      if(b1.toString() === 'K')
+      if(b1.name === 'K')
          this.blackKing = b1;
    }
 }
@@ -188,6 +190,7 @@ Game.prototype.processMove = function(pgn, team){
 
    this.turn = this.turn === 'white' ? 'black' : 'white';
    this.turnCount++;
+   this.moves.push(pgn);
 
    return captured;
 }
@@ -352,4 +355,30 @@ Game.prototype.getSqrForPiece = function(piece){
  */
 Game.prototype.getPieceFromCoord = function(x,y){
    return this.board.squares[x][y].piece;
+}
+
+
+/*
+ * Print out the moves in pgn form.
+ */
+Game.prototype.toHtmlTable = function(){
+   var html = '<table>\n' + 
+                  '<thead>\n' + 
+                     '<tr>\n' + 
+                        '<th>White</th> \n' + 
+                        '<th>Black</th> \n' + 
+                     '</tr>\n' + 
+                  '</thead>\n' + 
+                  '<tbody>';
+   for(var i = 0; i < this.moves.length; i++){
+      if(i % 2 == 0){
+         html += '<tr>';
+      }
+      html += '<td>' + this.moves[i] + '</td>';
+      if(i % 2 == 1){
+         html += '</tr>\n';
+      }
+   }
+
+   return html + '</tbody>\n</table>';
 }
