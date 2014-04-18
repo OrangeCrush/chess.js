@@ -3,7 +3,6 @@ function Game(){
    this.newGame();
 }
 
-
 Game.prototype.newGame = function(){
    this.board = new Board();
 
@@ -169,8 +168,7 @@ Game.prototype.processMove = function(pgn, team){
       var coord_to = pgnSqrToCoords(spots[1]);
 
       var sqr_from = this.board.squares[coord_from.x][coord_from.y];
-      var sqr_to   = this.board.squares[coord_to.x][coord_to.y];
-
+      var sqr_to   = this.board.squares[coord_to.x][coord_to.y]; 
       captured = this.movePiece(sqr_from, sqr_to);
 
    }else{//castle move
@@ -221,8 +219,7 @@ Game.prototype.movePiece = function(sqr_from, sqr_to){
 }
 
 /*
- * Basically needed for catling.
- * TODO LMAO this is not how you castle wtf was i thinking
+ * Lol might end up being useless; yeah probably
  */
 Game.prototype.swapPiece = function(sqr1, sqr2){
    var temp = sqr1.piece;
@@ -346,6 +343,12 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
    return squares;
 }
 
+/*
+ * Pass two pieces, returns t/f if it piece_atk can attack piece_def
+ */
+Game.prototype.canPieceCapture  = function(piece_atk, piece_def){
+   return isSqrInAry(this.getMoveSquaresForPiece(piece_atk, piece_atk.color), this.getSqrForPiece(piece_def));
+}
 
 /*
  * Returns the square that piece is on
