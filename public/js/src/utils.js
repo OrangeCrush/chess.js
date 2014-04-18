@@ -31,32 +31,9 @@ function buildPieceByCol(col, init){
    }
 }
 
-function isPieceAtPGNsqr(spot){
-   var piece_type = spot[0];
-   var board_column = letters[spot[1]];
-   var board_row = +spot[2] - 1;
-   var piece_from = this.board.squares[board_row][board_column];
-
-   // Check if the piece is what it says it is
-   return piece_from.name === piece_type;
-}
-
 function isPGNCastle(pgn){
    return pgn === 'O-O-O' || pgn === 'O-O';
 }
-
-function canPieceMoveTo(piece, dest){
-   
-}
-
-function isCheck(){
-
-}
-
-function isCheckMate(){
-
-}
-
 
 function pgnSqrToCoords(pgnSqr){
    return {

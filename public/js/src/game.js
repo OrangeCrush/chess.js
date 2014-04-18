@@ -304,39 +304,72 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
    squares = [];
    var x = piece.xpos;
    var y = piece.ypos;
+   var blocked = false;
    if(direction.up_down){
       //March Right
-      for(var i = 1; i <= n && onBoard({x: x + i, y:y}) && !this.board.squares[x + i][y].occupied; i++){
+      for(var i = 1; i <= n && onBoard({x: x + i, y:y}) && !blocked; i++){
+         if(this.board.squares[x + i][y].occupied){
+            blocked = true;
+         }
          squares.push(this.board.squares[x + i][y]);
       }
+
+
       //March Left
-      for(var i = 1; i <= n && onBoard({x: x - i, y:y}) && !this.board.squares[x - i][y].occupied; i++){
+      blocked = false;
+      for(var i = 1; i <= n && onBoard({x: x - i, y:y}) && !blocked; i++){
+         if(this.board.squares[x - i][y].occupied){
+            blocked = true;
+         }
          squares.push(this.board.squares[x - i][y]);
       }
       //March Up
-      for(var i = 1; i < n && onBoard({x: x, y: y + i}) && !this.board.squares[x][y + i].occupied; i++){
+      blocked = false
+      for(var i = 1; i < n && onBoard({x: x, y: y + i}) && !blocked; i++){
+         if(this.board.squares[x][y + i].occupied){
+            blocked = true;
+         }
          squares.push(this.board.squares[x][y + i]);
       }
       //March Down
-      for(var i = 1; i <= n && onBoard({x: x, y: y - i}) && !this.board.squares[x][y - i].occupied; i++){
+      for(var i = 1; i <= n && onBoard({x: x, y: y - i}) && !blocked; i++){
+         if(this.board.squares[x][y - i].occupied){
+            blocked = true;
+         }
          squares.push(this.board.squares[x][y - i]);
       }
    }
    if(direction.diag){
       //March Up-Right
-      for(var i = 1; i <= n && onBoard({x: x + i, y: y + i}) && !this.board.squares[x + i][y + i].occupied; i++){
+      blocked = false;
+      for(var i = 1; i <= n && onBoard({x: x + i, y: y + i}) && !blocked; i++){
+         if(this.board.squares[x + i][y + i].occupied){
+            blocked = true;
+         }
          squares.push(this.board.squares[x + i][y + i]);
       }
       //March Up-Left
-      for(var i = 1; i <= n && onBoard({x: x - i, y: y + i}) && !this.board.squares[x - i][y + i].occupied; i++){
+      blocked = false;
+      for(var i = 1; i <= n && onBoard({x: x - i, y: y + i}) && !blocked; i++){
+         if(this.board.squares[x - i][y + i].occupied){
+            blocked = true;
+         }
          squares.push(this.board.squares[x - i][y + i]);
       }
       //March Down-Left
-      for(var i = 1; i <= n && onBoard({x: x - i, y: y - i}) && !this.board.squares[x - i][y - i].occupied; i++){
+      blocked = false;
+      for(var i = 1; i <= n && onBoard({x: x - i, y: y - i}) && !blocked; i++){
+         if(this.board.squares[x - i][y - i].occupied){
+            blocked = true;
+         }
          squares.push(this.board.squares[x - i][y - i]);
       }
       //March Down-Right
-      for(var i = 1; i <= n && onBoard({x: x + i, y: y - i}) && !this.board.squares[x + i][y - i].occupied; i++){
+      blocked = false;
+      for(var i = 1; i <= n && onBoard({x: x + i, y: y - i}) && !blocked; i++){
+         if(this.board.squares[x + i][y - i].occupied){
+            blocked = true;
+         }
          squares.push(this.board.squares[x + i][y - i]);
       }
    }
