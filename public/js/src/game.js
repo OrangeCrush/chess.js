@@ -351,6 +351,22 @@ Game.prototype.canPieceCapture  = function(piece_atk, piece_def){
 }
 
 /*
+ * Predicate to see whether or not team team is in check
+ * team ::= /(black|white)/
+ */
+Game.prototype.isCheckForTeam = function(team){
+   //Get opposite (attacking) team
+   var pieces = team === 'white' ? this.black : this.white;
+   var king   = team === 'white' ? this.whiteKing : this.blackKing;
+   for(var i = 0 ; i < pieces.length; i++){
+      if(this.canPieceCapture(pieces[i], king)){
+         return true;
+      }
+   }
+   return false;
+}
+
+/*
  * Returns the square that piece is on
  */
 Game.prototype.getSqrForPiece = function(piece){

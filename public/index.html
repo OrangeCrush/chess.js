@@ -23,11 +23,19 @@
 
         <!-- Add your site or application content here -->
         
-        <form id ="moveForm"><input id='pgn' type='text' /><input id='move' type='submit' value='Move'/></form>
+        <form id ="moveForm">
+           <input id='pgn' type='text' />
+           <input id='move' type='submit' value='Move'/>
+        </form>
         <div id='msgBox'></div>
         <div id='game'></div>
         <div id='moves'></div>
-
+        <h3></h3>
+        <form id ="multMove">
+           <textarea id='pgnMult' rows="10"></textarea>
+           <input id='moveMult' type='submit' value='Move'/>
+           <a href="http://www.chessgames.com/">ChessGames.com</a>
+        </form>
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.2.min.js"><\/script>')</script>
@@ -50,7 +58,8 @@
             var g = new Game();
             document.getElementById("game").innerHTML = g.board.toHtmlTable();
             document.getElementById("moves").innerHTML = g.toHtmlTable();
-            document.getElementById("move").onclick = function(e){
+
+            document.getElementById("moveForm").onsubmit = function(e){
                e.preventDefault(); 
                document.getElementById("msgBox").innerHTML = '';
                var pgn = document.getElementById("pgn").value;
@@ -62,6 +71,21 @@
                }
                document.getElementById("game").innerHTML = g.board.toHtmlTable();
                document.getElementById("moves").innerHTML = g.toHtmlTable();
+            }
+
+            document.getElementById("multMove").onsubmit = function(e){
+               e.preventDefault();
+               document.getElementById("msgBox").innerHTML = '';
+               var pgn = document.getElementById('pgnMult').value;
+               try{
+                  g.runMoves(pgn.split(' '));
+               }catch(ex){
+                  document.getElementById("msgBox").innerHTML = '<b>Invalid Move: ' + ex + '</b>';
+               }
+
+               document.getElementById("game").innerHTML = g.board.toHtmlTable();
+               document.getElementById("moves").innerHTML = g.toHtmlTable();
+               document.getElementById('pgnMult').value = '';
             }
         </script>
     </body>
