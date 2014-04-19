@@ -79,7 +79,11 @@ Game.prototype.validateMove = function(pgnMove, team){
                if(piece.color === this.turn){
                   var moveSquares = this.getMoveSquaresForPiece(piece, team);
                   if(isSqrInAry(moveSquares, spot_to)){
-                     return {valid: true, desc:'Go for it kid'}; //As long as moveSqrs fns handle check i think this is O.K.
+                     if(!this.moveResultsInCheck(piece, this.board.squares[spot_to.x][spot_to.y], team)){
+                        return {valid: true, desc:'Go for it kid'}; //As long as moveSqrs fns handle check i think this is O.K.
+                     }else{
+                        return {valid: false, desc:"Move would result in check for " + team};
+                     }
                   }else{
                      return {valid: false, desc:"Move wasn't in moveSquares."};
                   }
@@ -289,6 +293,10 @@ Game.prototype.getMoveSquaresForPiece = function(piece, team){
       break;
 
    }
+   //var self = this;
+   //return squares.filter(function(sqr){
+   //   return self.moveResultsInCheck(piece, sqr, team);                     
+   //});
    return squares;
 }
 
@@ -397,8 +405,13 @@ Game.prototype.isCheckForTeam = function(team){
    return false;
 }
 
-Game.prototype.moveResultsInCheck = function(piece, sqr_move_to){
-   var x = deepCopy(this);
+/*
+ * Make a temp game, move the piece, see if there is check.
+ */
+Game.prototype.moveResultsInCheck = function(piece, sqr_move_to, team){
+   var future_game = deepCopyObj(this);
+   future_game.movePiece(future_game.getSqrForPiece(piece), future_game.board.squares[sqr_move_to.x][sqr_move_to.y]);
+   return future_game.isCheckForTeam(team);
 }
 
 /*

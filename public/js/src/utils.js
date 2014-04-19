@@ -65,6 +65,8 @@ function deepCopyObj(obj){
    for(var key in obj) {
       if(obj[key] instanceof Array){
          x[key] = deepCopyAry(obj[key]);
+      }else if(obj[key] instanceof Function){
+         x[key] = obj[key].bind(x);
       }else if(obj[key] instanceof Object){
          x[key] = deepCopyObj(obj[key]);
       }else{//primative
