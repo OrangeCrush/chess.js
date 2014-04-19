@@ -59,3 +59,14 @@ function isSqrInAry(ary, sqr){
    }
    return false;
 }
+
+function deepCopy(obj){
+   var x = {};
+   for(var key in obj) {
+      if(obj[key] instanceof Array){
+         x[key] = [];
+      }else if(obj[key] instanceof Object){
+         x[key] = deepCopy(obj[key]);
+      }
+   }
+}

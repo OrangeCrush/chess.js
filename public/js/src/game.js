@@ -3,6 +3,7 @@ function Game(){
    this.newGame();
 }
 
+
 Game.prototype.newGame = function(){
    this.board = new Board();
 
@@ -313,13 +314,10 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
          }
          squares.push(this.board.squares[x + i][y]);
       }
-
-
       //March Left
       blocked = false;
       for(var i = 1; i <= n && onBoard({x: x - i, y:y}) && !blocked; i++){
-         if(this.board.squares[x - i][y].occupied){
-            blocked = true;
+         if(this.board.squares[x - i][y].occupied){ blocked = true;
          }
          squares.push(this.board.squares[x - i][y]);
       }
@@ -397,6 +395,10 @@ Game.prototype.isCheckForTeam = function(team){
       }
    }
    return false;
+}
+
+Game.prototype.moveResultsInCheck = function(piece, sqr_move_to){
+   var x = deepCopy(this);
 }
 
 /*
