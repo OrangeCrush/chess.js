@@ -60,13 +60,30 @@ function isSqrInAry(ary, sqr){
    return false;
 }
 
-function deepCopy(obj){
+function deepCopyObj(obj){
    var x = {};
    for(var key in obj) {
       if(obj[key] instanceof Array){
-         x[key] = [];
+         x[key] = deepCopyAry(obj[key]);
       }else if(obj[key] instanceof Object){
-         x[key] = deepCopy(obj[key]);
+         x[key] = deepCopyObj(obj[key]);
+      }else{//primative
+         x[key] = obj[key];
       }
    }
+   return x;
+}
+
+function deepCopyAry(ary){
+   var copy = [];
+   for(var x in ary){
+      if(ary[x] instanceof Array){
+         copy[x] = deepCopyAry(ary[x]);
+      }else if(ary[x] instanceof Object){
+         copy[x]  = deepCopyObj(ary[x]);
+      }else{//Primative, make shallow copy
+         copy[x] = ary[x];
+      }
+   }
+   return copy;
 }
