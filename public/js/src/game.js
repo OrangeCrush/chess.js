@@ -111,18 +111,18 @@ Game.prototype.validateMove = function(pgnMove, team){
  *   [x] The rook that castles has been moved earlier in the game.
  *   [x] There are pieces standing between your king and rook.
  *   [x] The king is in check.
- *   [_] The king moves through a square that is attacked by a piece of the opponent.
- *   [_] The king would be in check after castling.
+ *   [x] The king moves through a square that is attacked by a piece of the opponent.
+ *   [x] The king would be in check after castling.
  *   http://www.chessvariants.org/d.chess/castlefaq.html
  */
 Game.prototype.canCastle = function(pgn, team){
    var king, rook, canCastle;
    if(team === 'black'){
       king = this.blackKing;
-      canCastle = this.blackCastle;
+      canCastle = this.blackCastle && this.blackCheck;
    }else if(team === 'white'){
       king = this.whiteKing;
-      canCastle = this.whiteCastle;
+      canCastle = this.whiteCastle && this.whiteCheck;
    }else{
       throw 'Team passed to canCastle does not match /(black|white)/';
    }
@@ -131,27 +131,27 @@ Game.prototype.canCastle = function(pgn, team){
          if(team === 'black'){
             rook = this.board.squares[0][7].piece;
             return rook.initialPos && !this.blackCheck &&
-               !this.board.squares[1][7].occupied &&
-               !this.board.squares[2][7].occupied &&
-               !this.board.squares[3][7].occupied;
+               !this.board.squares[1][7].occupied && 
+               !this.board.squares[2][7].occupied && !this.moveResultsInCheck(king, this.board.squares[2][7], team) &&
+               !this.board.squares[3][7].occupied && !this.moveResultsInCheck(king, this.board.squares[3][7], team);
          }else{
             rook = this.board.squares[0][0].piece;
             return rook.initialPos && !this.whiteCheck && 
-               !this.board.squares[1][0].occupied &&
-               !this.board.squares[2][0].occupied &&
-               !this.board.squares[3][0].occupied;
+               !this.board.squares[1][0].occupied && 
+               !this.board.squares[2][0].occupied && !this.moveResultsInCheck(king, this.board.squares[2][0], team) &&
+               !this.board.squares[3][0].occupied && !this.moveResultsInCheck(king, this.board.squares[3][0], team);
          }
       }else if(pgn === 'O-O'){ //Kingside
          if(team === 'black'){
             rook = this.board.squares[7][7].piece;
             return rook.initialPos && !this.blackCheck &&
-               !this.board.squares[6][7].occupied &&
-               !this.board.squares[5][7].occupied;
+               !this.board.squares[6][7].occupied && !this.moveResultsInCheck(king, this.board.squares[6][7], team) &&
+               !this.board.squares[5][7].occupied && !this.moveResultsInCheck(king, this.board.squares[5][7], team);
          }else{
             rook = this.board.squares[7][0].piece;
             return rook.initialPos && !this.whiteCheck &&
-               !this.board.squares[6][0].occupied &&
-               !this.board.squares[5][0].occupied;
+               !this.board.squares[6][0].occupied && !this.moveResultsInCheck(king, this.board.squares[6][0], team) &&
+               !this.board.squares[5][0].occupied && !this.moveResultsInCheck(king, this.board.squares[5][0], team);
          }
       }else{
          throw 'PGN not valid in canCastle';
@@ -503,11 +503,11 @@ Game.prototype.toHtmlTable = function(){
  */
 Game.prototype.runMoves = function(pgnAry){
    for(var i = 0; i < pgnAry.length; i++){
-      var err;
-      if(err = this.validateMove(pgnAry[i], this.turn)){
+      var err = this.validateMove(pgnAry[i], this.turn);
+      if(err.valid){
          this.processMove(pgnAry[i], this.turn);
       }else{
-         throw pgnAry[i] + ' was an invalid move: ' + err;
+         throw pgnAry[i] + ' was an invalid move: ' + err.desc;
       }
    }
 }
