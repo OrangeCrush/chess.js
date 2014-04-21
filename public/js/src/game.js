@@ -331,7 +331,7 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
             blocked = true;
          }
          //Make sure we don't include pieces with the same color in the results
-         if(this.board.squares[x + i][y].occupied && this.board.squares[x + i][y].piece.color !== piece.color){
+         if(!this.board.squares[x + i][y].occupied || this.board.squares[x + i][y].occupied && this.board.squares[x + i][y].piece.color !== piece.color){
             squares.push(this.board.squares[x + i][y]);
          }
       }
@@ -340,7 +340,7 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
       for(var i = 1; i <= n && onBoard({x: x - i, y:y}) && !blocked; i++){
          if(this.board.squares[x - i][y].occupied){ blocked = true;
          }
-         if(this.board.squares[x - i][y].occupied && this.board.squares[x - i][y].piece.color !== piece.color){
+         if(!this.board.squares[x - i][y].occupied || this.board.squares[x - i][y].occupied && this.board.squares[x - i][y].piece.color !== piece.color){
             squares.push(this.board.squares[x - i][y]);
          }
       }
@@ -350,7 +350,7 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
          if(this.board.squares[x][y + i].occupied){
             blocked = true;
          }
-         if(this.board.squares[x][y + i].occupied && this.board.squares[x][y + i].piece.color !== piece.color){
+         if(!this.board.squares[x][y + i].occupied || this.board.squares[x][y + i].occupied && this.board.squares[x][y + i].piece.color !== piece.color){
             squares.push(this.board.squares[x][y + i]);
          }
       }
@@ -359,7 +359,7 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
          if(this.board.squares[x][y - i].occupied){
             blocked = true;
          }
-         if(this.board.squares[x][y - i].occupied && this.board.squares[x][y - i].piece.color !== piece.color){
+         if(!this.board.squares[x][y - i].occupied || this.board.squares[x][y - i].occupied && this.board.squares[x][y - i].piece.color !== piece.color){
             squares.push(this.board.squares[x][y - i]);
          }
       }
@@ -371,7 +371,7 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
          if(this.board.squares[x + i][y + i].occupied){
             blocked = true;
          }
-         if(this.board.squares[x + i][y + i].occupied && this.board.squares[x + i][y + i].piece.color !== piece.color){
+         if(!this.board.squares[x + i][y + i].occupied || this.board.squares[x + i][y + i].occupied && this.board.squares[x + i][y + i].piece.color !== piece.color){
             squares.push(this.board.squares[x + i][y + i]);
          }
       }
@@ -381,7 +381,7 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
          if(this.board.squares[x - i][y + i].occupied){
             blocked = true;
          }
-         if(this.board.squares[x - i][y + i].occupied && this.board.squares[x - i][y + i].piece.color !== piece.color){
+         if(!this.board.squares[x - i][y + i].occupied || this.board.squares[x - i][y + i].occupied && this.board.squares[x - i][y + i].piece.color !== piece.color){
             squares.push(this.board.squares[x - i][y + i]);
          }
       }
@@ -391,7 +391,7 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
          if(this.board.squares[x - i][y - i].occupied){
             blocked = true;
          }
-         if(this.board.squares[x - i][y - i].occupied && this.board.squares[x - i][y - i].piece.color !== piece.color){
+         if(!this.board.squares[x - i][y - i].occupied || this.board.squares[x - i][y - i].occupied && this.board.squares[x - i][y - i].piece.color !== piece.color){
             squares.push(this.board.squares[x - i][y - i]);
          }
       }
@@ -401,7 +401,7 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
          if(this.board.squares[x + i][y - i].occupied){
             blocked = true;
          }
-         if(this.board.squares[x + i][y - i].occupied && this.board.squares[x + i][y - i].piece.color !== piece.color){
+         if(!this.board.squares[x + i][y - i].occupied || this.board.squares[x + i][y - i].occupied && this.board.squares[x + i][y - i].piece.color !== piece.color){
             squares.push(this.board.squares[x + i][y - i]);
          }
       }
