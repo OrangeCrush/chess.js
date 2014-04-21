@@ -61,7 +61,12 @@ Board.prototype.toHtmlTable = function(){
       html += '<td><b>' + (i + 1) + '</b></td>\n';
       for(var j = 0; j < 8; j++){
          if(this.squares[j][i].occupied){
-            html += '<td>' + this.squares[j][i].piece.toString() + '&nbsp;</td>';
+            if(this.squares[j][i].piece.color === 'black'){
+               html += '<td><b>' + this.squares[j][i].piece.toString() + '&nbsp;</b></td>';
+            }else{
+               html += '<td>' + this.squares[j][i].piece.toString() + '&nbsp;</td>';
+
+            }
          }else{
             html += '<td>&nbsp;&nbsp</td>';
          }
