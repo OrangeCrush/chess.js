@@ -50,6 +50,10 @@ function errMsg(code, msg, loc){
    }
 }
 
+function otherTeam(team){
+   return team === 'white' ? 'black' : 'white';
+}
+
 
 function isSqrInAry(ary, sqr){
    for(var i =0; i < ary.length; i++){

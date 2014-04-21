@@ -82,7 +82,7 @@ Game.prototype.validateMove = function(pgnMove, team){
                      if(!this.moveResultsInCheck(piece, this.board.squares[spot_to.x][spot_to.y], team)){
                         return {valid: true, desc:'Go for it kid'}; //As long as moveSqrs fns handle check i think this is O.K.
                      }else{
-                        return {valid: false, desc:"Move would result in check for " + team};
+                        return {valid: false, desc:"Move would result in check for " + otherTeam(team)};
                      }
                   }else{
                      return {valid: false, desc:"Move wasn't in moveSquares."};
@@ -200,6 +200,20 @@ Game.prototype.processMove = function(pgn, team){
    this.turnCount++;
    this.moves.push(pgn);
 
+   if(this.isCheckForTeam(otherTeam(team))){
+      if(team === 'black'){
+         this.whiteCheck = true;
+      }else{
+         this.blackCheck = true;
+      }
+   }else{
+     if(team === 'black') {
+         this.whiteCheck = false;
+     }else{
+         this.blackCheck = false;
+     }
+   }
+
    return captured;
 }
 
@@ -217,6 +231,9 @@ Game.prototype.movePiece = function(sqr_from, sqr_to){
       sqr_to.piece.initialPos = false;
       sqr_to.piece.xpos  = sqr_to.x;
       sqr_to.piece.ypos  = sqr_to.y;
+      if(sqr_to.piece.name === 'K'){ //Update kings if they were moved.
+         sqr_to.piece.color === 'white' ? this.whiteKing : this.blackKing = sqr_to.piece;
+      }
 
       sqr_from.piece = null;
       sqr_from.occupied = false;
@@ -239,9 +256,6 @@ Game.prototype.swapPiece = function(sqr1, sqr2){
  * Returns a set of moves that could be made by a piece
  * [x] Filters on Pieces in the way
  * [x] Filters on Squares off the board
- * [_] Filters on Check
- * [_] Filters on Checkmate
- * [_] Filters on Pieces that block Checkmate
  * [_] Adds Castling Moves
  */
 Game.prototype.getMoveSquaresForPiece = function(piece, team){
@@ -293,10 +307,6 @@ Game.prototype.getMoveSquaresForPiece = function(piece, team){
       break;
 
    }
-   //var self = this;
-   //return squares.filter(function(sqr){
-   //   return self.moveResultsInCheck(piece, sqr, team);                     
-   //});
    return squares;
 }
 
@@ -412,6 +422,39 @@ Game.prototype.moveResultsInCheck = function(piece, sqr_move_to, team){
    var future_game = deepCopyObj(this);
    future_game.movePiece(future_game.getSqrForPiece(piece), future_game.board.squares[sqr_move_to.x][sqr_move_to.y]);
    return future_game.isCheckForTeam(team);
+}
+
+/*
+ * Checks for checkmate in a game..
+ * Check each moveSquare of the King, 
+ * if he is in check for all AND if he currently is in check
+ * it is checkmate.
+ *
+ * returns ::= {
+ *    stalemate: t/f
+ *    checkmate: t/f
+ * }
+ */
+Game.prototype.isCheckMateForTeam = function(team){
+   var king   = team === 'white' ? this.whiteKing : this.blackKing;
+   var moves = this.getMoveSquaresForPiece(king, team);
+   var check = team === 'white' ? this.whiteCheck : this.blackCheck;
+
+   var foundOpen = false;
+   for(var i = 0; i < moves.length && !foundOpen; i++){
+      var g = deepCopyObj(this);
+      g.movePiece(g.getSqrForPiece(king), g.board.squares[moves[i].x][moves[i].y]);
+      foundOpen = g.isCheckForTeam(team);
+   }
+
+   return {
+      checkmate: check && !foundOpen,
+      stalemate: !foundOpen
+   };
+}
+
+Game.prototype.canTeamBlockCheck = function(team){
+
 }
 
 /*
