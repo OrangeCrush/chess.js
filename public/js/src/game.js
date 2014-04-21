@@ -330,14 +330,19 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
          if(this.board.squares[x + i][y].occupied){
             blocked = true;
          }
-         squares.push(this.board.squares[x + i][y]);
+         //Make sure we don't include pieces with the same color in the results
+         if(this.board.squares[x + i][y].occupied && this.board.squares[x + i][y].piece.color !== piece.color){
+            squares.push(this.board.squares[x + i][y]);
+         }
       }
       //March Left
       blocked = false;
       for(var i = 1; i <= n && onBoard({x: x - i, y:y}) && !blocked; i++){
          if(this.board.squares[x - i][y].occupied){ blocked = true;
          }
-         squares.push(this.board.squares[x - i][y]);
+         if(this.board.squares[x - i][y].occupied && this.board.squares[x - i][y].piece.color !== piece.color){
+            squares.push(this.board.squares[x - i][y]);
+         }
       }
       //March Up
       blocked = false
@@ -345,14 +350,18 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
          if(this.board.squares[x][y + i].occupied){
             blocked = true;
          }
-         squares.push(this.board.squares[x][y + i]);
+         if(this.board.squares[x][y + i].occupied && this.board.squares[x][y + i].piece.color !== piece.color){
+            squares.push(this.board.squares[x][y + i]);
+         }
       }
       //March Down
       for(var i = 1; i <= n && onBoard({x: x, y: y - i}) && !blocked; i++){
          if(this.board.squares[x][y - i].occupied){
             blocked = true;
          }
-         squares.push(this.board.squares[x][y - i]);
+         if(this.board.squares[x][y - i].occupied && this.board.squares[x][y - i].piece.color !== piece.color){
+            squares.push(this.board.squares[x][y - i]);
+         }
       }
    }
    if(direction.diag){
@@ -362,7 +371,9 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
          if(this.board.squares[x + i][y + i].occupied){
             blocked = true;
          }
-         squares.push(this.board.squares[x + i][y + i]);
+         if(this.board.squares[x + i][y + i].occupied && this.board.squares[x + i][y + i].piece.color !== piece.color){
+            squares.push(this.board.squares[x + i][y + i]);
+         }
       }
       //March Up-Left
       blocked = false;
@@ -370,7 +381,9 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
          if(this.board.squares[x - i][y + i].occupied){
             blocked = true;
          }
-         squares.push(this.board.squares[x - i][y + i]);
+         if(this.board.squares[x - i][y + i].occupied && this.board.squares[x - i][y + i].piece.color !== piece.color){
+            squares.push(this.board.squares[x - i][y + i]);
+         }
       }
       //March Down-Left
       blocked = false;
@@ -378,7 +391,9 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
          if(this.board.squares[x - i][y - i].occupied){
             blocked = true;
          }
-         squares.push(this.board.squares[x - i][y - i]);
+         if(this.board.squares[x - i][y - i].occupied && this.board.squares[x - i][y - i].piece.color !== piece.color){
+            squares.push(this.board.squares[x - i][y - i]);
+         }
       }
       //March Down-Right
       blocked = false;
@@ -386,7 +401,9 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
          if(this.board.squares[x + i][y - i].occupied){
             blocked = true;
          }
-         squares.push(this.board.squares[x + i][y - i]);
+         if(this.board.squares[x + i][y - i].occupied && this.board.squares[x + i][y - i].piece.color !== piece.color){
+            squares.push(this.board.squares[x + i][y - i]);
+         }
       }
    }
    return squares;
@@ -442,9 +459,7 @@ Game.prototype.isCheckMateForTeam = function(team){
 
    var foundOpen = false;
    for(var i = 0; i < moves.length && !foundOpen; i++){
-      var g = deepCopyObj(this);
-      g.movePiece(g.getSqrForPiece(king), g.board.squares[moves[i].x][moves[i].y]);
-      foundOpen = g.isCheckForTeam(team);
+      foundOpen = this.moveResultsInCheck(king, this.board.squares[moves[i].x][moves[i].y], team);
    }
 
    return {
