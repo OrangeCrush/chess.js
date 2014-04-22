@@ -470,10 +470,6 @@ Game.prototype.isCheckMateForTeam = function(team){
    };
 }
 
-Game.prototype.canTeamBlockCheck = function(team){
-
-}
-
 /*
  * Returns the square that piece is on
  */
@@ -527,4 +523,45 @@ Game.prototype.runMoves = function(pgnAry){
          throw pgnAry[i] + ' was an invalid move: ' + err.desc;
       }
    }
+}
+
+/*
+ * Full blown PGN reader.  Only should be used by testing things
+ * and probably not AI's (Should be easier to generate the normal and sane h3-h6 type PGN)
+ *
+ * returns ::= [...
+ * {
+ *    spot_from: {x: int, y: int}, // Zero based spots
+ *    spot_to:   {x: int, y: int},
+ *    castle: /(O-O-O)|(O-O)/
+ *
+ * }
+ * ...]
+ */
+Game.prototype.parseRealPgnAry = function(pgnAry){
+   //Try to categorize it
+   for(var i = 0; i < pgnAry.length; i++){
+   }
+}
+
+/*
+ * Trys to read one real pgn move and returns a zero-based spot-
+ *    if it's a castle just return it as is
+ *    returns ::= {
+ *       spot_from: {x: int, y: int}, //0-based
+ *       spot_to:   {x: int, y: int},
+ *       castle: /(O-O-O)|(O-O)/
+ *    }
+ */
+Game.prototype.parseRealPgnMove = function(pgn){
+   if(pgn === 'O-O-O' || pgn === 'O-O'){
+      return {castle : pgn};
+   }else if(pgn.match(/^[a-h][1-8]$/i)){ //e4
+      //Loop and find the only piece that could have moved here
+      console.log('e4');
+   }else if(pgn.match(/^[QRNKPB]?[a-h][1-8][x-][QRNKPB]?[a-h][1-8]$/i)){//e4-Qe5
+      console.log('Nf3-Ng5');
+   }//else if(pgn.match){
+         
+   //}
 }
