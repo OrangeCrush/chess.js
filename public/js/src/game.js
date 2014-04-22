@@ -457,14 +457,16 @@ Game.prototype.isCheckMateForTeam = function(team){
    var moves = this.getMoveSquaresForPiece(king, team);
    var check = team === 'white' ? this.whiteCheck : this.blackCheck;
 
-   var foundOpen = false;
-   for(var i = 0; i < moves.length && !foundOpen; i++){
-      foundOpen = this.moveResultsInCheck(king, this.board.squares[moves[i].x][moves[i].y], team);
+   //Assume it's checkmate until we find a move that does not result in check
+   var checkmate = true;
+   for(var i = 0; i < moves.length; i++){
+      //&&= and &= are not defined as operators in Ecmascript
+      checkmate = checkmate && this.moveResultsInCheck(king, this.board.squares[moves[i].x][moves[i].y], team);
    }
 
    return {
-      checkmate: check && !foundOpen,
-      stalemate: !foundOpen
+      checkmate: check && checkmate,
+      stalemate: !check && checkmate
    };
 }
 
