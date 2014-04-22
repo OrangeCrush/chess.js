@@ -78,7 +78,7 @@
                document.getElementById("msgBox").innerHTML = '';
                var pgn = document.getElementById('pgnMult').value;
                try{
-                  g.runMoves(pgn.split(' '));
+                  g.runMoves(pgn.split(' ')); //todo this ends up working pretty awful
                }catch(ex){
                   document.getElementById("msgBox").innerHTML = '<b>Invalid Move: ' + ex + '</b>';
                }
