@@ -540,14 +540,19 @@ Game.prototype.runMoves = function(pgnAry){
  * It is assumed that the pgn that this game is fed is actually valid (training data)
  * so this assumption should be fine
  */
-Game.prototype.getPieceThatCanMoveToCoord = function(coordStr, team){
+Game.prototype.getPieceThatCanMoveToCoord = function(coordStr, team, name, colContext){
    var pieces = team === 'black' ? this.black : this.white;
    var sqr = pgnSqrToCoords(coordStr);
-   for(var i in pieces){
-      if(isSqrInAry(this.getValidMovesForPiece(pieces[i]), sqr)){
-         return pieces[i];
+   var game = this;
+   return pieces.filter(function(x){
+      var keep = true;
+      if(name){
+         keep = x.name === name;
+         if(keep && colContext){//also filter anything not in the same column
+            var colNum = column.charCodeAt(0) - 'a'.charCodeAt(0);
+            keep = x.x == colNum;
+         }
       }
-   }
-   return null;
+      return keep && isSqrInAry(game.getValidMovesForPiece(x), sqr);//Just trying to save some cycles
+   })[0]; //let it throw an exception I need to know why anyways
 }
-

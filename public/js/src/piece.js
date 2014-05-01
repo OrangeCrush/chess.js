@@ -40,6 +40,14 @@ Piece.prototype.toString = function(){
    return this.name;
 }
 
+/*
+ * Actually go backwards now and go from 0 based
+ * x-y coords to a-h 1-8
+ */
+Piece.prototype.coordsToString = function(){
+   return String.fromCharCode('a'.charCodeAt(0) + this.xpos) + (this.ypos + 1);
+}
+
 
 function Knight(init){
    Piece.call(this, init);

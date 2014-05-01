@@ -96,13 +96,13 @@ function deepCopyAry(ary){
 
 function tryParsingRealPGN(pgnBlock){
    //Remove comments
-   var pgnMoves = pgnBlock.replace(/{.*?}/g, '').replace(/\[.*?\]/g, '');//.replace(/[\n\r]/g, '');
+   var pgnMoves = pgnBlock.replace(/{.*?}/g, '').replace(/\[.*?\]/g, '').replace(/[#+=]/, '');
    var movesPgn =  pgnMoves.split(/[0-9]+\./).filter(function(x){
-      return x !== '';
+      return !x.match(/^\s+$/) && x !== '';
    }).map(function(x){
       return x.trim().split(/\s+/);     
    });
-   parseRealPgnAry(movesPgn);
+   return parseRealPgnAry(movesPgn);
 }
 
 
@@ -119,33 +119,55 @@ function tryParsingRealPGN(pgnBlock){
  */
 function parseRealPgnAry(pgnAry){
    //Try to categorize it
+   var normalPgn = []
    var g1 = new Game(); //Temporary game to resolve the ambiguity of the 'Machine friendly' pgn
    for(var i = 0; i < pgnAry.length; i++){
-      //white
+      for(var j = 0 ; j < 2; j++){//make two moves
+         var realMove = parseRealPgnMove(pgnAry[i][j], game)
+         normalPgn.concat(realMove);
+         game.processMove(realMove);
+      }
+   }
+   return normalPgn;
+}
 
-      //black
+/*
+ * Trys to read one real pgn move and a sane version of pgn
+ *    if it's a castle just return it as is
+ */
+function parseRealPgnMove(pgn, game){
+   if(pgn === 'O-O-O' || pgn === 'O-O'){
+      return pgn;
+   }else if(pgn.match(/^[BRKPNQ]?[a-h][1-8]$/i)){ //e4
+      var piece = game.getPieceThatCanMoveToCoord(pgn, game.turn, );
+      return piece.coordsToString() + '-' + stripNameAndCol(pgn);
+   //}else if(pgn.match()){
+   }else{
+      throw 'Invalid pgn in parseRealPgnMove: ' + pgn;
    }
 }
 
 /*
- * Trys to read one real pgn move and returns a zero-based spot-
- *    if it's a castle just return it as is
- *    returns ::= {
- *       spot_from: {x: int, y: int}, //0-based
- *       spot_to:   {x: int, y: int},
- *       castle: /(O-O-O)|(O-O)/
- *    }
+ * Turns e4 -> e4
+ *       Be4 -> e4
+ *       axb4 -> b4
  */
-function parseRealPgnMove(pgn){
-   if(pgn === 'O-O-O' || pgn === 'O-O'){
-   }else if(pgn.match(/^[a-h][1-8]$/i)){ //e4
-      //Loop and find the only piece that could have moved here
-   }else if(pgn.match(/^[QRNKPB]?[a-h][1-8][x-][QRNKPB]?[a-h][1-8]$/i)){//e4-Qe5
-      var pieces = pgn.split(/[x-]/)
+function stripNameAndCol(pgnSqr){
+   if(pgnSqr.length >= 4){
+      return pgnSqr.slice(2,4);
+   }else if(pgnSqr.length === 3){
+      return pgnSqr.slice(1,3);
+   }else if(pgnSqr.length == 2){
+      return pgnSqr;
    }else{
-      throw 'invalid pgn in parseRealPgnMove';
+      throw 'Unexpected Length in stripNameAndCol: ' + pgnSqr.length;
    }
 }
+
+function return NameAndCol(){
+   //TODO since its like 4:00am make this return {name: col:} for a given bulshit pgn string
+}
+
 
 
 var block = '[Event "F/S Return Match"]' + '\n' +
