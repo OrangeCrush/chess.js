@@ -96,14 +96,13 @@ function deepCopyAry(ary){
 
 function tryParsingRealPGN(pgnBlock){
    //Remove comments
-   return  pgnBlock.replace(/{.*?}/g, '').replace(/\[.*?\]/g, '').replace(/[\n\r]/g, '');
+   var pgnMoves = pgnBlock.replace(/{.*?}/g, '').replace(/\[.*?\]/g, '');//.replace(/[\n\r]/g, '');
    var movesPgn =  pgnMoves.split(/[0-9]+\./).filter(function(x){
       return x !== '';
    }).map(function(x){
-      return x.trim();     
+      return x.trim().split(/\s+/);     
    });
-   return movesPgn;
-
+   parseRealPgnAry(movesPgn);
 }
 
 
@@ -120,7 +119,11 @@ function tryParsingRealPGN(pgnBlock){
  */
 function parseRealPgnAry(pgnAry){
    //Try to categorize it
+   var g1 = new Game(); //Temporary game to resolve the ambiguity of the 'Machine friendly' pgn
    for(var i = 0; i < pgnAry.length; i++){
+      //white
+
+      //black
    }
 }
 

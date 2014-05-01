@@ -311,6 +311,16 @@ Game.prototype.getMoveSquaresForPiece = function(piece, team){
 }
 
 /*
+ * Gets the valid moves for a piece.  Useful in interfaces and Ai's
+ */
+Game.prototype.getValidMovesForPiece = function(piece){
+   var game = this;
+   return this.getMoveSquaresForPiece(piece, piece.color).filter(function(x){
+      return !game.moveResultsInCheck(piece, x, piece.color);
+   });
+}
+
+/*
  * Returns an array of pieces that are
  * in the specified direction and not occupied 
  * for n squares
@@ -523,5 +533,21 @@ Game.prototype.runMoves = function(pgnAry){
          throw pgnAry[i] + ' was an invalid move: ' + err.desc;
       }
    }
+}
+
+/*
+ * Return the first piece that can move to the sqr on team team
+ * It is assumed that the pgn that this game is fed is actually valid (training data)
+ * so this assumption should be fine
+ */
+Game.prototype.getPieceThatCanMoveToCoord = function(coordStr, team){
+   var pieces = team === 'black' ? this.black : this.white;
+   var sqr = pgnSqrToCoords(coordStr);
+   for(var i in pieces){
+      if(isSqrInAry(this.getValidMovesForPiece(pieces[i]), sqr)){
+         return pieces[i];
+      }
+   }
+   return null;
 }
 
