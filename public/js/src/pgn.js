@@ -34,7 +34,7 @@ PGN.prototype.parseRealPGNAry = function(pgnAry){
       for(var j = 0 ; j < 2; j++){//make two moves
          var realMove = this.parseRealPgnMove(pgnAry[i][j]);
          normalPgn.concat(realMove);
-         this.game.processMove(realMove);
+         this.game.processMove(realMove, j == 0 ? 'white' : 'black');
       }
    }
    return normalPgn;
@@ -47,11 +47,11 @@ PGN.prototype.parseRealPGNAry = function(pgnAry){
 PGN.prototype.parseRealPgnMove = function(pgn){
    if(pgn === 'O-O-O' || pgn === 'O-O'){
       return pgn;
-   }else if(pgn.match(/^[BRKPNQ]?[a-h]?[a-h][1-8]$/i)){ //e4
+   }else if(pgn.match(/^[BRKPNQ]?[a-h]?[a-h][1-8]$/i)){ //e4 or Nbd7
       var nameCol = nameAndCol(pgn);
       piece = this.game.getPieceThatCanMoveToCoord(pgn, this.game.turn, nameCol.name, nameCol.col);
       return piece.coordsToString() + '-' + this.stripNameAndCol(pgn);
-   //}else if(pgn.match()){
+   }else if(pgn.match()){
    }else{
       throw 'Invalid pgn in parseRealPgnMove: ' + pgn;
    }

@@ -191,7 +191,12 @@ Game.prototype.processMove = function(pgn, team){
       var king_newx = pgn === 'O-O' ? 6 : 2;
       var rook_newx = pgn === 'O-O' ? 5 : 3;
 
+      var rook = rook_sqr.piece;
+
       this.movePiece(this.getSqrForPiece(king), this.board.squares[king_newx][ypos]);
+
+      rook_sqr.piece = rook; //Re-attach so that movePiece works
+
       this.movePiece(rook_sqr, this.board.squares[rook_newx][ypos]);
 
    }
@@ -549,8 +554,8 @@ Game.prototype.getPieceThatCanMoveToCoord = function(coordStr, team, name, colCo
       if(name){
          keep = x.name === name;
          if(keep && colContext){//also filter anything not in the same column
-            var colNum = column.charCodeAt(0) - 'a'.charCodeAt(0);
-            keep = x.x == colNum;
+            var colNum = colContext.charCodeAt(0) - 'a'.charCodeAt(0);
+            keep = x.xpos == colNum;
          }
       }
       return keep && isSqrInAry(game.getValidMovesForPiece(x), sqr);//Just trying to save some cycles
