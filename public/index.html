@@ -89,6 +89,13 @@
             }
 
             var pgn = new PGN({pgn:block});
+            for(var i=0; i < pgn.parsedPGN.length; i++){
+               for(var j=0; j < 2; j++){
+                  pgn.runToken(pgn.parsedPGN[i][j]);
+                  document.getElementById("game").innerHTML = pgn.game.board.toHtmlTable();
+                  //alert(pgn.parsedPGN[i][j]); //block for a continue or something
+               }
+            }
             //pgn.tryParsingRealPGN(function(pgn){
             //   document.getElementById("game").innerHTML = pgn.game.board.toHtmlTable();
             //   alert(pgn); //block for a continue or something

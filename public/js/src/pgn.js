@@ -6,11 +6,6 @@ function PGN(init){
    this.moveStack = [];  //will eventually implement goign backwards
    this.tryParsingRealPGN(init.pgn);
 
-   for(var i=0; i < this.parsedPGN.length; i++){
-      for(var j=0; j < 2; j++){
-         this.runToken(this.parsedPGN[i][j]);
-      }
-   }
 }
 
 /*
@@ -96,11 +91,34 @@ PGN.prototype.stripNameAndCol = function(pgnSqr){
  * Bd3
  */
 function nameAndCol(pgn){
-   if(pgn.length === 3){
+   if(pgn.length === 3){//Pe4
       return {
          name: pgn[0],
          col: null
+      };
+   }else if(pgn.length == 4 && pgn.indexOf('x') == -1){//Nbd7
+      return {
+         name: pgn[0],
+         col:pgn[1]
+      };
+   }else if(pgn.length == 4 && pgn.indexOf('x') != -1){//Nxd3  or cxd4
+      if(pgn.match(/^[a-h]/)){
+         return {
+            name: 'P',
+            col: pgn[0]
+         };
       }
+      return {
+         name: pgn[0],
+         col: null
+      };
+   }else if(pgn.length == 5 && pgn.indexOf('x') != -1){//Nbxd4
+      return {
+         name: pgn[0],
+         col:pgn[1]
+      };
+   }else{
+      throw "Unexpected move in nameAndCol"
    }
 }
 
@@ -140,22 +158,22 @@ PGN.prototype.verifyPreconditions = function(){
 PGN.prototype.runToken = function(pgnToken){
    this.handlePreconditions(pgnToken);
    if(!this.isTokenEndGame(pgnToken)){
-      if(pgnToken.length <= 3){
+      if(isPGNCastle(pgnToken)){
+         this.game.processMove(pgnToken, this.game.turn);
+      }else if(pgnToken.length <= 3){
          if(pgnToken.length === 2){//add the pawn name on for filtering + then it wont matter if they actually have it
             pgnToken = 'P' + pgnToken;
          }
          //Process standard move -> in format <Piece><col><row>
          var nameCol = nameAndCol(pgnToken);
-         var piece = this.game.getPieceThatCanMoveToCoord(pgn, this.game.turn, nameCol.name, nameCol.col);
+         var piece = this.game.getPieceThatCanMoveToCoord(pgnToken, this.game.turn, nameCol.name, nameCol.col);
          var realMove = this.pushMoveByPiece(piece, pgnToken);
-         this.processMove(realMove, this.game.turn);
-      }else if(pgnToken.length <= 5 && pgn.indexOf('x') != -1){
+         this.game.processMove(realMove, this.game.turn);
+      }else if(pgnToken.length <= 5){
          var nameCol = nameAndCol(pgnToken);
-         var piece = this.game.getPieceThatCanMoveToCoord(pgn, this.game.turn, nameCol.name, nameCol.col);
+      var piece = this.game.getPieceThatCanMoveToCoord(pgnToken, this.game.turn, nameCol.name, nameCol.col);
          var realMove = this.pushMoveByPiece(piece, pgnToken);
-         this.processMove(realMove, this.game.turn);
-      }else if(isPGNCastle(pgnToken)){//castle
-         this.game.processMove(pgnToken, this.game.team);
+         this.game.processMove(realMove, this.game.turn);
       }else{
          throw "Unrecognized Token in runToken: " + pgnToken;
       }
@@ -177,8 +195,8 @@ PGN.prototype.resetPreconditions = function(){
  * Also return last pushed square.
  */
 PGN.prototype.pushMoveByPiece = function(piece, pgn){
-   this.movestack.push(piece.coordsToString() + '-' + this.stripNameAndCol(pgn));
-   return this.movestack[0];
+   this.moveStack.unshift(piece.coordsToString() + '-' + this.stripNameAndCol(pgn));
+   return this.moveStack[0];
 }
 
 /*
