@@ -87,6 +87,13 @@
                document.getElementById("moves").innerHTML = g.toHtmlTable();
                document.getElementById('pgnMult').value = '';
             }
+
+            var pgn = new PGN({pgn:block});
+            //pgn.tryParsingRealPGN(function(pgn){
+            //   document.getElementById("game").innerHTML = pgn.game.board.toHtmlTable();
+            //   alert(pgn); //block for a continue or something
+            //});
+
         </script>
     </body>
 </html>

@@ -1,19 +1,34 @@
 function PGN(init){
    this.game = new Game();
-   this.original = init.pgn;
-   this.parsedPGN = [];
+   this.original = init.pgn; 
+   this.resetPreconditions();
+   this.parsedPGN = [];  //tokens
+   this.moveStack = [];  //will eventually implement goign backwards
+   this.tryParsingRealPGN(init.pgn);
+
+   for(var i=0; i < this.parsedPGN.length; i++){
+      for(var j=0; j < 2; j++){
+         this.runToken(this.parsedPGN[i][j]);
+      }
+   }
 }
 
+/*
+ * First pass through the PGN.
+ * Takes out all tags:  []
+ * Takes out all comments : {}
+ * Trims whitespace on pgn tokens
+ * Sets parsedPGN to an array of PGN tokens
+ */
 PGN.prototype.tryParsingRealPGN = function(){
    //Remove comments
    var pgnBlock = this.original;
    var pgnMoves = pgnBlock.replace(/{.*?}/g, '').replace(/\[.*?\]/g, '').replace(/[#+=]/, '');
-   var movesPgn =  pgnMoves.split(/[0-9]+\./).filter(function(x){
+   this.parsedPGN =  pgnMoves.split(/[0-9]+\./).filter(function(x){
       return !x.match(/^\s+$/) && x !== '';
    }).map(function(x){
       return x.trim().split(/\s+/);     
    });
-   this.parsedPGN = this.parseRealPGNAry(movesPgn);
 }
 
 /*
@@ -47,16 +62,15 @@ PGN.prototype.parseRealPGNAry = function(pgnAry){
 PGN.prototype.parseRealPgnMove = function(pgn){
    if(pgn === 'O-O-O' || pgn === 'O-O'){
       return pgn;
-   }else if(pgn.match(/^[BRKPNQ]?[a-h]?[a-h][1-8]$/i)){ //e4 or Nbd7
+   }else if(pgn.match(/^[BRKPNQ]?[a-h]?[x-]?[a-h][1-8]$/i)){ //e4 or Nbd7
       var nameCol = nameAndCol(pgn);
       piece = this.game.getPieceThatCanMoveToCoord(pgn, this.game.turn, nameCol.name, nameCol.col);
       return piece.coordsToString() + '-' + this.stripNameAndCol(pgn);
-   }else if(pgn.match()){
    }else{
       throw 'Invalid pgn in parseRealPgnMove: ' + pgn;
    }
 }
-
+//
 /*
  * Turns e4 -> e4
  *       Be4 -> e4
@@ -77,15 +91,106 @@ PGN.prototype.stripNameAndCol = function(pgnSqr){
 
 /*
  * returns ::= {name: "R" col:"b"} for example
+ * Some different cases this will handle
+ *
+ * Bd3
  */
 function nameAndCol(pgn){
-   return {
-      name : pgn.length > 2 ? pgn[0] : null,
-      col: pgn.length == 4 ? pgn[1] : null
+   if(pgn.length === 3){
+      return {
+         name: pgn[0],
+         col: null
+      }
    }
 }
 
+/*
+ * We want to store preconditions on the object so we can check them after the turn is over.
+ * We also don't want them in the token, so if we find one take it off.
+ * If we need to we can use capturing as a precondition 
+ * Return the changed token
+ */
+PGN.prototype.handlePreconditions =  function(pgnToken){
+   var team = this.game.turn;
+   if(pgnToken[pgnToken.length] === '+'){
+      this.pre[team].check = true;
+      pgnToken = pgnToken.slice(0, pgnToken.length - 1);
+   }else if(pgnToken[pgnToken.length] === '#'){
+      this.pre[team].checkmate = true;
+      pgnToken = pgnToken.slice(0, pgnToken.length - 1);
+   }
+   return pgnToken;
+}
 
+/*
+ * Check if the preconditions set for the turn actually were
+ * reflected in the game.  If not, theres a good chance
+ * we messed something up.
+ */
+PGN.prototype.verifyPreconditions = function(){
+
+   this.resetPreconditions();
+}
+
+/*
+ * Run a single pgn token.  Decide what move should be played out,
+ * make the move, and update the status of the game.  Checks preconditions and
+ * resets them.  Translates moves into a form sq-sq. Puts moves on the stack.
+ */
+PGN.prototype.runToken = function(pgnToken){
+   this.handlePreconditions(pgnToken);
+   if(!this.isTokenEndGame(pgnToken)){
+      if(pgnToken.length <= 3){
+         if(pgnToken.length === 2){//add the pawn name on for filtering + then it wont matter if they actually have it
+            pgnToken = 'P' + pgnToken;
+         }
+         //Process standard move -> in format <Piece><col><row>
+         var nameCol = nameAndCol(pgnToken);
+         var piece = this.game.getPieceThatCanMoveToCoord(pgn, this.game.turn, nameCol.name, nameCol.col);
+         var realMove = this.pushMoveByPiece(piece, pgnToken);
+         this.processMove(realMove, this.game.turn);
+      }else if(pgnToken.length <= 5 && pgn.indexOf('x') != -1){
+         var nameCol = nameAndCol(pgnToken);
+         var piece = this.game.getPieceThatCanMoveToCoord(pgn, this.game.turn, nameCol.name, nameCol.col);
+         var realMove = this.pushMoveByPiece(piece, pgnToken);
+         this.processMove(realMove, this.game.turn);
+      }else if(isPGNCastle(pgnToken)){//castle
+         this.game.processMove(pgnToken, this.game.team);
+      }else{
+         throw "Unrecognized Token in runToken: " + pgnToken;
+      }
+
+   }else{//Game Over
+      
+   }
+   //if(!this.verifyPreconditions()){
+   //   throw "Conditions not verified correctly";
+   //}
+}
+
+PGN.prototype.resetPreconditions = function(){
+   this.pre = {black:{check:false, checkmate:false}, white:{check:false, checkmate:false}}; //track conditions
+}
+
+/*
+ * Convert moves to a1-a1 format
+ * Also return last pushed square.
+ */
+PGN.prototype.pushMoveByPiece = function(piece, pgn){
+   this.movestack.push(piece.coordsToString() + '-' + this.stripNameAndCol(pgn));
+   return this.movestack[0];
+}
+
+/*
+ * Returns true if the token is an end game token
+ * 1-0      white won
+ * 0-1      black won
+ * 1/2-1/2  draw
+ * *        ongoing game
+ */
+PGN.prototype.isTokenEndGame = function(pgntoken){
+   return pgntoken === '1-0' || pgntoken === '0-1' || pgntoken === '1/2-1/2' || pgntoken === '*';
+}
 
 
 var block = '[Event "F/S Return Match"]' + '\n' +
