@@ -229,3 +229,21 @@ var block = '[Event "F/S Return Match"]' + '\n' +
 'hxg5 29. b3 Ke6 30. a3 Kd6 31. axb4 cxb4 32. Ra5 Nd5 33. f3 Bc8 34. Kf2 Bf5' + '\n' +
 '35. Ra7 g6 36. Ra6+ Kc5 37. Ke1 Nf4 38. g3 Nxh3 39. Kd2 Kb5 40. Rd6 Kc5 41. Ra6' + '\n' +
 'Nf2 42. g4 Bd3 43. Re6 1/2-1/2' + '\n';
+
+
+var block2 = '[Event "FIDE-Wch k.o. g/25+10"]' + '\n' + 
+'[Site "Las Vegas"]' + '\n' + 
+'[Date "1999/08/14"]' + '\n' + 
+'[Round "5.4"]' + '\n' + 
+'[White "Kramnik, Vladimir"]' + '\n' + 
+'[Black "Adams, Michael"]' + '\n' + 
+'[Result "1/2-1/2"]' + '\n' + 
+'[WhiteElo "2760"]' + '\n' + 
+'[BlackElo "2708"]' + '\n' + 
+'[ECO "A17"]' + '\n' + 
+
+'1.Nf3 Nf6 2.c4 e6 3.Nc3 Bb4 4.Qc2 O-O 5.a3 Bxc3 6.Qxc3 b6 7.e3 Bb7 8.Be2 c5' + '\n' + 
+'9.b4 d6 10.Bb2 e5 11.O-O Re8 12.d3 Nbd7 13.Rfe1 a5 14.bxc5 bxc5 15.d4 Ne4' + '\n' + 
+'16.Qc2 cxd4 17.exd4 Ng5 18.Nxg5 Qxg5 19.d5 f5 20.Rab1 Nc5 21.Bc3 Bc8 22.Rb6 Rd8' + '\n' + 
+'23.Rb5 f4 24.Bf1 Bf5 25.Qd1 Rdc8 26.Rxa5 Rxa5 27.Bxa5 h5 28.Bb4  1/2-1/2' + '\n'; 
+

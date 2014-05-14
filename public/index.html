@@ -88,7 +88,7 @@
                document.getElementById('pgnMult').value = '';
             }
 
-            var pgn = new PGN({pgn:block});
+            var pgn = new PGN({pgn:block2});
             for(var i=0; i < pgn.parsedPGN.length; i++){
                for(var j=0; j < 2; j++){
                   pgn.runToken(pgn.parsedPGN[i][j]);

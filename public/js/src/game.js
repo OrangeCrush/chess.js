@@ -368,7 +368,7 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
          }
       }
       //March Up
-      blocked = false
+      blocked = false;
       for(var i = 1; i < n && onBoard({x: x, y: y + i}) && !blocked; i++){
          if(this.board.squares[x][y + i].occupied){
             blocked = true;
@@ -378,6 +378,7 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
          }
       }
       //March Down
+      blocked = false;
       for(var i = 1; i <= n && onBoard({x: x, y: y - i}) && !blocked; i++){
          if(this.board.squares[x][y - i].occupied){
             blocked = true;
