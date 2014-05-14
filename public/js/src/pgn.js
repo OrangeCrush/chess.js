@@ -18,7 +18,7 @@ function PGN(init){
 PGN.prototype.tryParsingRealPGN = function(){
    //Remove comments
    var pgnBlock = this.original;
-   var pgnMoves = pgnBlock.replace(/{.*?}/g, '').replace(/\[.*?\]/g, '').replace(/[#+=]/, '');
+   var pgnMoves = pgnBlock.replace(/{.*?}/g, '').replace(/\[.*?\]/g, '');//.replace(/[#+=]/, '');
    this.parsedPGN =  pgnMoves.split(/[0-9]+\./).filter(function(x){
       return !x.match(/^\s+$/) && x !== '';
    }).map(function(x){
@@ -146,8 +146,10 @@ PGN.prototype.handlePreconditions =  function(pgnToken){
  * we messed something up.
  */
 PGN.prototype.verifyPreconditions = function(){
-
+   var valid = this.pre['black'].check == this.game.blackCheck &&
+               this.pre['white'].check == this.game.whiteCheck;
    this.resetPreconditions();
+   return valid;
 }
 
 /*
@@ -155,8 +157,8 @@ PGN.prototype.verifyPreconditions = function(){
  * make the move, and update the status of the game.  Checks preconditions and
  * resets them.  Translates moves into a form sq-sq. Puts moves on the stack.
  */
-PGN.prototype.runToken = function(pgnToken){
-   this.handlePreconditions(pgnToken);
+PGN.prototype.runToken = function(rawPgn){
+   var pgnToken =  this.handlePreconditions(rawPgn);
    if(!this.isTokenEndGame(pgnToken)){
       if(isPGNCastle(pgnToken)){
          this.game.processMove(pgnToken, this.game.turn);
@@ -181,9 +183,9 @@ PGN.prototype.runToken = function(pgnToken){
    }else{//Game Over
       
    }
-   //if(!this.verifyPreconditions()){
-   //   throw "Conditions not verified correctly";
-   //}
+   if(!this.verifyPreconditions()){
+      throw "Conditions not verified correctly after move " + pgnToken;
+   }
 }
 
 PGN.prototype.resetPreconditions = function(){

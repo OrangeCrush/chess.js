@@ -36,6 +36,10 @@ Piece.prototype.movePattern = function(){
    return moves.filter(onBoard);
 }
 
+Piece.prototype.equals = function(piece){
+   return this.xpos === piece.xpos && this.ypos === piece.ypos && this.name === piece.name && this.color === piece.color;
+}
+
 Piece.prototype.toString = function(){
    return this.name;
 }

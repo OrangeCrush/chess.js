@@ -201,7 +201,7 @@ Game.prototype.processMove = function(pgn, team){
 
    }
 
-   this.turn = this.turn === 'white' ? 'black' : 'white';
+   this.turn = otherTeam(this.turn);
    this.turnCount++;
    this.moves.push(pgn);
 
@@ -219,7 +219,17 @@ Game.prototype.processMove = function(pgn, team){
      }
    }
 
+   if(captured != null){ //remove piece from array
+      var pieces = otherTeam(team) === 'black' ? this.black : this.white ;
+      otherTeam(team) === 'black' ? this.black : this.white = pieces.filter(function(piece){
+         return !piece.equals(captured);
+      });
+   }
    return captured;
+}
+
+Game.prototype.teamPieces = function(team){
+   return team === 'black' ? this.black : this.white;
 }
 
 /*
