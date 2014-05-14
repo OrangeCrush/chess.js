@@ -129,11 +129,11 @@ function nameAndCol(pgn){
  * Return the changed token
  */
 PGN.prototype.handlePreconditions =  function(pgnToken){
-   var team = this.game.turn;
-   if(pgnToken[pgnToken.length] === '+'){
+   var team = otherTeam(this.game.turn);
+   if(pgnToken[pgnToken.length - 1] === '+'){
       this.pre[team].check = true;
       pgnToken = pgnToken.slice(0, pgnToken.length - 1);
-   }else if(pgnToken[pgnToken.length] === '#'){
+   }else if(pgnToken[pgnToken.length - 1] === '#'){
       this.pre[team].checkmate = true;
       pgnToken = pgnToken.slice(0, pgnToken.length - 1);
    }
@@ -181,7 +181,7 @@ PGN.prototype.runToken = function(rawPgn){
       }
 
    }else{//Game Over
-      
+      console.log('Game Over!');
    }
    if(!this.verifyPreconditions()){
       throw "Conditions not verified correctly after move " + pgnToken;

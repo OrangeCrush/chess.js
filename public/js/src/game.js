@@ -205,26 +205,10 @@ Game.prototype.processMove = function(pgn, team){
    this.turnCount++;
    this.moves.push(pgn);
 
-   if(this.isCheckForTeam(otherTeam(team))){
-      if(team === 'black'){
-         this.whiteCheck = true;
-      }else{
-         this.blackCheck = true;
-      }
-   }else{
-     if(team === 'black') {
-         this.whiteCheck = false;
-     }else{
-         this.blackCheck = false;
-     }
-   }
+   this.whiteCheck = this.isCheckForTeam('white');
+   this.blackCheck = this.isCheckForTeam('black');
 
-   if(captured != null){ //remove piece from array
-      var pieces = otherTeam(team) === 'black' ? this.black : this.white ;
-      otherTeam(team) === 'black' ? this.black : this.white = pieces.filter(function(piece){
-         return !piece.equals(captured);
-      });
-   }
+
    return captured;
 }
 
@@ -252,6 +236,20 @@ Game.prototype.movePiece = function(sqr_from, sqr_to){
 
       sqr_from.piece = null;
       sqr_from.occupied = false;
+
+      if(captured != null){ //remove piece from array
+         var pieces = otherTeam(this.turn) === 'black' ? this.black : this.white ;
+         if(otherTeam(this.turn) === 'white'){
+            this.white = pieces.filter(function(piece){
+               return !piece.equals(captured);
+            });
+         }else{
+            this.black = pieces.filter(function(piece){
+               return !piece.equals(captured);
+            });
+         }
+      }
+
       return captured;
 }
 
