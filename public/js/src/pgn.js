@@ -1,8 +1,9 @@
 function PGN(init){
    this.start = new Date();
+   var self = this;
    this.game = new Game({
       promote: function(piece){
-         piece.name = this.promoteTo;
+         piece.name = self.promoteTo;
       }
    });
    this.original = init.pgn; 

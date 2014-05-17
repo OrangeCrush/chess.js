@@ -90,7 +90,7 @@
 
             var pgn = new PGN({pgn:PromotionGame});
             for(var i=0; i < pgn.parsedPGN.length; i++){
-               for(var j=0; j < 2; j++){
+               for(var j=0; j < pgn.parsedPGN[i].length; j++){
                   pgn.runToken(pgn.parsedPGN[i][j]);
                   document.getElementById("game").innerHTML = pgn.game.board.toHtmlTable();
                   //alert(pgn.parsedPGN[i][j]); //block for a continue or something
