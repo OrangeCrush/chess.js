@@ -1,11 +1,16 @@
 function PGN(init){
-   this.game = new Game();
+   this.start = new Date();
+   this.game = new Game({
+      promote: function(piece){
+         piece.name = this.promoteTo;
+      }
+   });
    this.original = init.pgn; 
    this.resetPreconditions();
    this.parsedPGN = [];  //tokens
    this.moveStack = [];  //will eventually implement goign backwards
    this.tryParsingRealPGN(init.pgn);
-
+   this.promoteTo = '';  
 }
 
 /*
@@ -70,17 +75,11 @@ PGN.prototype.parseRealPgnMove = function(pgn){
  * Turns e4 -> e4
  *       Be4 -> e4
  *       axb4 -> b4
+ *       Rfxe5 -> e5
+ *       Lol TODO this should just return the last two chars of the string..
  */
 PGN.prototype.stripNameAndCol = function(pgnSqr){
-   if(pgnSqr.length >= 4){
-      return pgnSqr.slice(2,4);
-   }else if(pgnSqr.length === 3){
-      return pgnSqr.slice(1,3);
-   }else if(pgnSqr.length == 2){
-      return pgnSqr;
-   }else{
-      throw 'Unexpected Length in stripNameAndCol: ' + pgnSqr.length;
-   }
+   return pgnSqr.slice(pgnSqr.length - 2, pgnSqr.length);
 }
 
 
@@ -130,6 +129,12 @@ function nameAndCol(pgn){
  */
 PGN.prototype.handlePreconditions =  function(pgnToken){
    var team = otherTeam(this.game.turn);
+   var equals_index;
+   if((equals_index = pgnToken.indexOf('=')) != -1){
+      this.pre[this.game.turn].promotion = true;
+      this.promoteTo = pgnToken[pgnToken.length - 1];
+      pgnToken = pgnToken.slice(0, equals_index);
+   }
    if(pgnToken[pgnToken.length - 1] === '+'){
       this.pre[team].check = true;
       pgnToken = pgnToken.slice(0, pgnToken.length - 1);
@@ -147,7 +152,9 @@ PGN.prototype.handlePreconditions =  function(pgnToken){
  */
 PGN.prototype.verifyPreconditions = function(){
    var valid = this.pre['black'].check == this.game.blackCheck &&
-               this.pre['white'].check == this.game.whiteCheck;
+               this.pre['white'].check == this.game.whiteCheck &&
+               this.pre['black'].promotion == this.game.blackPromotion &&
+               this.pre['white'].promotion == this.game.whitePromotion;
    this.resetPreconditions();
    return valid;
 }
@@ -181,7 +188,9 @@ PGN.prototype.runToken = function(rawPgn){
       }
 
    }else{//Game Over
-      console.log('Game Over!');
+      console.log('Game Over!\n' + rawPgn);
+      console.log(new Date() - this.start);
+
    }
    if(!this.verifyPreconditions()){
       throw "Conditions not verified correctly after move " + pgnToken;
@@ -189,7 +198,7 @@ PGN.prototype.runToken = function(rawPgn){
 }
 
 PGN.prototype.resetPreconditions = function(){
-   this.pre = {black:{check:false, checkmate:false}, white:{check:false, checkmate:false}}; //track conditions
+   this.pre = {black:{check:false, checkmate:false, promotion:false}, white:{check:false, checkmate:false, promotion:false}}; //track conditions
 }
 
 /*
@@ -213,7 +222,7 @@ PGN.prototype.isTokenEndGame = function(pgntoken){
 }
 
 
-var block = '[Event "F/S Return Match"]' + '\n' +
+var block2 = '[Event "F/S Return Match"]' + '\n' +
 '[Site "Belgrade, Serbia Yugoslavia|JUG"]' + '\n' +
 '[Date "1992.11.04"]' + '\n' +
 '[Round "29"]' + '\n' +
@@ -231,7 +240,7 @@ var block = '[Event "F/S Return Match"]' + '\n' +
 'Nf2 42. g4 Bd3 43. Re6 1/2-1/2' + '\n';
 
 
-var block2 = '[Event "FIDE-Wch k.o. g/25+10"]' + '\n' + 
+var block = '[Event "FIDE-Wch k.o. g/25+10"]' + '\n' + 
 '[Site "Las Vegas"]' + '\n' + 
 '[Date "1999/08/14"]' + '\n' + 
 '[Round "5.4"]' + '\n' + 
@@ -246,4 +255,24 @@ var block2 = '[Event "FIDE-Wch k.o. g/25+10"]' + '\n' +
 '9.b4 d6 10.Bb2 e5 11.O-O Re8 12.d3 Nbd7 13.Rfe1 a5 14.bxc5 bxc5 15.d4 Ne4' + '\n' + 
 '16.Qc2 cxd4 17.exd4 Ng5 18.Nxg5 Qxg5 19.d5 f5 20.Rab1 Nc5 21.Bc3 Bc8 22.Rb6 Rd8' + '\n' + 
 '23.Rb5 f4 24.Bf1 Bf5 25.Qd1 Rdc8 26.Rxa5 Rxa5 27.Bxa5 h5 28.Bb4  1/2-1/2' + '\n'; 
+
+
+var PromotionGame = 
+'[Event "Open NOR-ch"]' + '\n' +
+'[Site "Oslo NOR"]' + '\n' +
+'[Date "2001.04.10"]' + '\n' +
+'[Round "5"]' + '\n' +
+'[White "Kabashaj,Agron"]' + '\n' +
+'[Black "Carlsen,M"]' + '\n' +
+'[Result "0-1"]' + '\n' +
+'[WhiteElo ""]' + '\n' +
+'[BlackElo "2064"]' + '\n' +
+'[ECO "A46"]' + '\n' +
+
+'1.d4 Nf6 2.Nf3 c5 3.g3 cxd4 4.Nxd4 d5 5.Nf3 Nc6 6.c4 e5 7.cxd5 Nxd5 8.e4 Ndb4' + '\n' +
+'9.Qxd8+ Kxd8 10.Na3 Bg4 11.Be2 Bxf3 12.Bxf3 Nd4 13.Bd1 Nd3+ 14.Kf1 Rc8 15.Be3 Nxb2' + '\n' +
+'16.Bxd4 exd4 17.Nb5 Bc5 18.e5 a6 19.Nd6 Bxd6 20.exd6 d3 21.Bb3 Re8 22.Kg2 Re2' + '\n' +
+'23.Rab1 Rc6 24.d7 Kxd7 25.Bxf7 Rf6 26.Bd5 Rfxf2+ 27.Kh3 b5 28.g4 Re3+ 29.Kh4 g5+' + '\n' +
+'30.Kh5 Rh3+ 31.Kxg5 Rhxh2 32.Rhg1 Re2 33.Bb7 Re6 34.Bg2 Nc4 35.Rbd1 d2 36.Bd5 Re5+' + '\n' +
+'37.Kf6 Rxd5 38.Kg7 Nb2 39.Rh1 Rxh1 40.Rxh1 d1=Q 41.Rxd1 Nxd1 42.Kxh7 Rg5  0-1';
 

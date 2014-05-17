@@ -1,4 +1,5 @@
-function Game(){
+function Game(init){
+   this.promote = init.promote; //Pass in a function to promote pawns
    this.board = new Board();
    this.newGame();
 }
@@ -21,6 +22,10 @@ Game.prototype.newGame = function(){
    this.turn = 'white';
    this.whiteCastle = true;
    this.blackCastle = true;
+
+   //Used for validating pgn basically true for 1 turn after a promotion
+   this.whitePromotion = false;
+   this.blackPromotion = false;
 
    for(var i = 0; i < 8; i++){
 
@@ -164,6 +169,7 @@ Game.prototype.canCastle = function(pgn, team){
 /*
  * Changes the state of a game (After validation..)
  * Assume validation has passed already
+ * Calls this.promote on pawn promotion
  */
 Game.prototype.processMove = function(pgn, team){
    var captured;
@@ -175,6 +181,17 @@ Game.prototype.processMove = function(pgn, team){
       var sqr_from = this.board.squares[coord_from.x][coord_from.y];
       var sqr_to   = this.board.squares[coord_to.x][coord_to.y]; 
       captured = this.movePiece(sqr_from, sqr_to);
+      
+      if(this.canPromote(sqr_to.piece)){
+         this.promote(sqr_to.piece);
+         if(team === 'black'){
+            this.blackPromotion = true;
+         }else{
+            this.whitePromotion = true;
+         }
+      }else{
+         this.whitePromotion = this.blackPromotion = false;
+      }
 
    }else{//castle move
       var king, rook_sqr;
@@ -230,8 +247,13 @@ Game.prototype.movePiece = function(sqr_from, sqr_to){
       sqr_to.piece.initialPos = false;
       sqr_to.piece.xpos  = sqr_to.x;
       sqr_to.piece.ypos  = sqr_to.y;
+
       if(sqr_to.piece.name === 'K'){ //Update kings if they were moved.
-         sqr_to.piece.color === 'white' ? this.whiteKing : this.blackKing = sqr_to.piece;
+         if(sqr_to.piece.color === 'white'){
+            this.whiteKing = sqr_to.piece;
+         }else{
+            this.blackKing = sqr_to.piece;
+         }
       }
 
       sqr_from.piece = null;
@@ -361,7 +383,8 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
       //March Left
       blocked = false;
       for(var i = 1; i <= n && onBoard({x: x - i, y:y}) && !blocked; i++){
-         if(this.board.squares[x - i][y].occupied){ blocked = true;
+         if(this.board.squares[x - i][y].occupied){ 
+            blocked = true;
          }
          if(!this.board.squares[x - i][y].occupied || this.board.squares[x - i][y].occupied && this.board.squares[x - i][y].piece.color !== piece.color){
             squares.push(this.board.squares[x - i][y]);
@@ -369,7 +392,7 @@ Game.prototype.marchUntilPiece = function(piece, direction, n){
       }
       //March Up
       blocked = false;
-      for(var i = 1; i < n && onBoard({x: x, y: y + i}) && !blocked; i++){
+      for(var i = 1; i <= n && onBoard({x: x, y: y + i}) && !blocked; i++){
          if(this.board.squares[x][y + i].occupied){
             blocked = true;
          }
@@ -445,7 +468,7 @@ Game.prototype.canPieceCapture  = function(piece_atk, piece_def){
  * team ::= /(black|white)/
  */
 Game.prototype.isCheckForTeam = function(team){
-   //Get opposite (attacking) team
+   //Get opposite (attacking) team pieces
    var pieces = team === 'white' ? this.black : this.white;
    var king   = team === 'white' ? this.whiteKing : this.blackKing;
    for(var i = 0 ; i < pieces.length; i++){
@@ -569,4 +592,10 @@ Game.prototype.getPieceThatCanMoveToCoord = function(coordStr, team, name, colCo
       }
       return keep && isSqrInAry(game.getValidMovesForPiece(x), sqr);//Just trying to save some cycles
    })[0]; //let it throw an exception I need to know why anyways
+}
+
+Game.prototype.canPromote = function(piece){
+   return (piece.name === 'P'  &&
+           ((piece.ypos === 0 && piece.color === 'black' ) ||
+            (piece.ypos === 7 && piece.color === 'white' )));
 }

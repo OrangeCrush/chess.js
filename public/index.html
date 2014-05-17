@@ -55,7 +55,7 @@
             ga('create','UA-XXXXX-X');ga('send','pageview');
         </script>
         <script>
-            var g = new Game();
+            var g = new Game({promote: function(piece){alert(piece)}});
             document.getElementById("game").innerHTML = g.board.toHtmlTable();
             document.getElementById("moves").innerHTML = g.toHtmlTable();
 
@@ -88,7 +88,7 @@
                document.getElementById('pgnMult').value = '';
             }
 
-            var pgn = new PGN({pgn:block2});
+            var pgn = new PGN({pgn:PromotionGame});
             for(var i=0; i < pgn.parsedPGN.length; i++){
                for(var j=0; j < 2; j++){
                   pgn.runToken(pgn.parsedPGN[i][j]);
@@ -96,10 +96,10 @@
                   //alert(pgn.parsedPGN[i][j]); //block for a continue or something
                }
             }
-            //pgn.tryParsingRealPGN(function(pgn){
-            //   document.getElementById("game").innerHTML = pgn.game.board.toHtmlTable();
-            //   alert(pgn); //block for a continue or something
-            //});
+            pgn.tryParsingRealPGN(function(pgn){
+               document.getElementById("game").innerHTML = pgn.game.board.toHtmlTable();
+               alert(pgn); //block for a continue or something
+            });
 
         </script>
     </body>
