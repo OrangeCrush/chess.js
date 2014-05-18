@@ -167,7 +167,8 @@ PGN.prototype.verifyPreconditions = function(){
  */
 PGN.prototype.runToken = function(rawPgn){
    var pgnToken =  this.handlePreconditions(rawPgn);
-   if(!this.isTokenEndGame(pgnToken)){
+   var gameNotOver = false;
+   if((gameOver = !this.isTokenEndGame(pgnToken))){
       if(isPGNCastle(pgnToken)){
          this.game.processMove(pgnToken, this.game.turn);
       }else if(pgnToken.length <= 3){
@@ -191,9 +192,8 @@ PGN.prototype.runToken = function(rawPgn){
    }else{//Game Over
       console.log('Game Over!\n' + rawPgn);
       console.log(new Date() - this.start);
-
    }
-   if(!this.verifyPreconditions()){
+   if(gameNotOver && !this.verifyPreconditions()){
       throw "Conditions not verified correctly after move " + pgnToken;
    }
 }

@@ -238,6 +238,8 @@ Game.prototype.teamPieces = function(team){
  * Do a shallow copy on the piece.
  * Update things
  * returns the piece that was destroyed (null if not)
+ *
+ * Also updates this.king, and removes captured piece from the games array
  */
 Game.prototype.movePiece = function(sqr_from, sqr_to){
       var captured = sqr_to.piece;
@@ -275,23 +277,11 @@ Game.prototype.movePiece = function(sqr_from, sqr_to){
       return captured;
 }
 
-/*
- * Lol might end up being useless; yeah probably
- */
-Game.prototype.swapPiece = function(sqr1, sqr2){
-   var temp = sqr1.piece;
-   sqr1.piece = sqr2.piece;
-   sqr2.piece = temp;
-
-   sqr2.piece.initialPos = sqr1.piece.initialPos = false;
-}
-
 
 /*
  * Returns a set of moves that could be made by a piece
  * [x] Filters on Pieces in the way
  * [x] Filters on Squares off the board
- * [_] Adds Castling Moves
  */
 Game.prototype.getMoveSquaresForPiece = function(piece, team){
    var squares = [];
