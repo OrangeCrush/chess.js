@@ -19,22 +19,6 @@ function Piece(init){
    this.initialPos = true;
 }
 
-Piece.prototype.movePattern = function(){
-   var moves = [];
-
-   //todo pawns can take diagonally..
-   moves.push({x: this.xpos, y: this.color === 'white' ? this.ypos + 1 : this.ypos - 1});
-
-   //If the pawn has not moved yet, it can move forward two
-   if(this.initialPos){
-      moves.push({
-         x: this.xpos,
-         y: this.color === 'white' ? this.ypos + 2 : this.ypos - 2
-      });
-   }
-
-   return moves.filter(onBoard);
-}
 
 Piece.prototype.equals = function(piece){
    return this.xpos === piece.xpos && this.ypos === piece.ypos && this.name === piece.name && this.color === piece.color;

@@ -36,6 +36,11 @@
            <input id='moveMult' type='submit' value='Move'/>
            <a href="http://www.chessgames.com/">ChessGames.com</a>
         </form>
+        <h3>PGN:</h3>
+        <form id ="pgnBlock">
+           <textarea id='pgnArea' rows="10"></textarea>
+           <input id='runGame' type='submit' value='Run Game'/>
+        </form>
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.2.min.js"><\/script>')</script>
@@ -58,6 +63,17 @@
             var g = new Game({promote: function(piece){alert(piece)}});
             document.getElementById("game").innerHTML = g.board.toHtmlTable();
             document.getElementById("moves").innerHTML = g.toHtmlTable();
+
+            document.getElementById('pgnBlock').onsubmit = function(e){
+               e.preventDefault();
+               var pgn = new PGN({pgn:document.getElementById('pgnArea').value});
+               for(var i=0; i < pgn.parsedPGN.length; i++){
+                  for(var j=0; j < pgn.parsedPGN[i].length; j++){
+                     pgn.runToken(pgn.parsedPGN[i][j]);
+                     document.getElementById("game").innerHTML = pgn.game.board.toHtmlTable();
+                  }
+               }
+            }
 
             document.getElementById("moveForm").onsubmit = function(e){
                e.preventDefault(); 
@@ -87,20 +103,6 @@
                document.getElementById("moves").innerHTML = g.toHtmlTable();
                document.getElementById('pgnMult').value = '';
             }
-
-            var pgn = new PGN({pgn:PromotionGame});
-            for(var i=0; i < pgn.parsedPGN.length; i++){
-               for(var j=0; j < pgn.parsedPGN[i].length; j++){
-                  pgn.runToken(pgn.parsedPGN[i][j]);
-                  document.getElementById("game").innerHTML = pgn.game.board.toHtmlTable();
-                  //alert(pgn.parsedPGN[i][j]); //block for a continue or something
-               }
-            }
-            pgn.tryParsingRealPGN(function(pgn){
-               document.getElementById("game").innerHTML = pgn.game.board.toHtmlTable();
-               alert(pgn); //block for a continue or something
-            });
-
         </script>
     </body>
 </html>
