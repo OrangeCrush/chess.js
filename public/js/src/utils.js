@@ -80,6 +80,9 @@ function deepCopyObj(obj){
    return x;
 }
 
+function coordsToPgnSqr(x,y){
+   return String.fromCharCode('a'.charCodeAt(0) + x) + (y + 1);
+}
 function deepCopyAry(ary){
    var copy = [];
    for(var x in ary){

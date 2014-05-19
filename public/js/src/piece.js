@@ -33,7 +33,7 @@ Piece.prototype.toString = function(){
  * x-y coords to a-h 1-8
  */
 Piece.prototype.coordsToString = function(){
-   return String.fromCharCode('a'.charCodeAt(0) + this.xpos) + (this.ypos + 1);
+   return coordsToPgnSqr(this.xpos, this.ypos);
 }
 
 

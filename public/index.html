@@ -28,7 +28,7 @@
            <input id='move' type='submit' value='Move'/>
         </form>
         <div id='msgBox'></div>
-        <div id='game'></div>
+        <canvas style="border-style: solid; border-width: 2px;" width="512" height="512"></canvas>
         <div id='moves'></div>
         <h3></h3>
         <form id ="multMove">
@@ -49,6 +49,7 @@
         <script src="js/src/board.js"></script>
         <script src="js/src/game.js"></script>
         <script src="js/src/pgn.js"></script>
+        <script src="js/src/canvas.js"></script>
 
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
         <script>
@@ -60,9 +61,20 @@
             ga('create','UA-XXXXX-X');ga('send','pageview');
         </script>
         <script>
-            var g = new Game({promote: function(piece){alert(piece)}});
-            document.getElementById("game").innerHTML = g.board.toHtmlTable();
-            document.getElementById("moves").innerHTML = g.toHtmlTable();
+           var canvas = document.getElementsByTagName('canvas')[0];
+           var ctx;
+           if(canvas.getContext){
+             ctx = canvas.getContext('2d');
+           }
+           var g = new Game({promote: function(piece){alert(piece)}});
+           redrawGame(ctx,g);
+
+           canvas.onclick = function(e){
+              e.preventDefault();
+              var x = e.pageX;
+              var y = e.pageY;
+              alert(coordsToPgnSqr(Math.ceil(x / 64) - 1, 8 - Math.ceil(y / 64)) +' : ' +  x + ' ' + y);
+           }
 
             document.getElementById('pgnBlock').onsubmit = function(e){
                e.preventDefault();
@@ -70,22 +82,23 @@
                for(var i=0; i < pgn.parsedPGN.length; i++){
                   for(var j=0; j < pgn.parsedPGN[i].length; j++){
                      pgn.runToken(pgn.parsedPGN[i][j]);
-                     document.getElementById("game").innerHTML = pgn.game.board.toHtmlTable();
                   }
                }
+               redrawGame(ctx, pgn.game);
             }
 
             document.getElementById("moveForm").onsubmit = function(e){
                e.preventDefault(); 
                document.getElementById("msgBox").innerHTML = '';
                var pgn = document.getElementById("pgn").value;
+               document.getElementById("pgn").value = '';
                var rval = g.validateMove(pgn, g.turn);
                if(rval.valid){
                   g.processMove(pgn, g.turn);
                }else{
                   document.getElementById("msgBox").innerHTML = '<b>Invalid Move: ' + rval.desc + '</b>';
                }
-               document.getElementById("game").innerHTML = g.board.toHtmlTable();
+               redrawGame(ctx, g);
                document.getElementById("moves").innerHTML = g.toHtmlTable();
             }
 
@@ -99,10 +112,23 @@
                   document.getElementById("msgBox").innerHTML = '<b>Invalid Move: ' + ex + '</b>';
                }
 
-               document.getElementById("game").innerHTML = g.board.toHtmlTable();
+               redrawGame(ctx,g);
                document.getElementById("moves").innerHTML = g.toHtmlTable();
                document.getElementById('pgnMult').value = '';
             }
+         function redrawGame(ctx, game){
+            ctx.clearRect(0, 0, 512,512);
+            ctx.fillStyle = 'rgb(103,110,39)'
+            // Draw a 500x500 board starting at 0, 0 
+            drawBoard(ctx, 0, 0, 512, 512);
+
+
+            var joined = game.white.concat(game.black);
+
+            for(var i =0; i < joined.length; i++){
+               drawPiece(ctx, joined[i].name, joined[i].color, joined[i].coordsToString());
+            }
+         }
         </script>
     </body>
 </html>
