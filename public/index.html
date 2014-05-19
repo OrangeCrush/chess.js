@@ -28,7 +28,7 @@
            <input id='move' type='submit' value='Move'/>
         </form>
         <div id='msgBox'></div>
-        <canvas style="border-style: solid; border-width: 2px;" width="512" height="512"></canvas>
+        <canvas style="border-style: solid; border-width: 2px;"></canvas>
         <div id='moves'></div>
         <h3></h3>
         <form id ="multMove">
@@ -50,6 +50,7 @@
         <script src="js/src/game.js"></script>
         <script src="js/src/pgn.js"></script>
         <script src="js/src/canvas.js"></script>
+        <script src="js/src/canvasGameBoard.js"></script>
 
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
         <script>
@@ -62,19 +63,14 @@
         </script>
         <script>
            var canvas = document.getElementsByTagName('canvas')[0];
-           var ctx;
-           if(canvas.getContext){
-             ctx = canvas.getContext('2d');
-           }
-           var g = new Game({promote: function(piece){alert(piece)}});
-           redrawGame(ctx,g);
-
-           canvas.onclick = function(e){
-              e.preventDefault();
-              var x = e.pageX;
-              var y = e.pageY;
-              alert(coordsToPgnSqr(Math.ceil(x / 64) - 1, 8 - Math.ceil(y / 64)) +' : ' +  x + ' ' + y);
-           }
+           var g = new CanvasGameBoard({
+               promote: function(piece){
+                  return 'Q';
+               }, 
+               canvas: canvas,
+               pieceSize: 64
+            });
+            g.redrawGame();
 
             document.getElementById('pgnBlock').onsubmit = function(e){
                e.preventDefault();
@@ -84,7 +80,7 @@
                      pgn.runToken(pgn.parsedPGN[i][j]);
                   }
                }
-               redrawGame(ctx, pgn.game);
+               g.redrawGame();
             }
 
             document.getElementById("moveForm").onsubmit = function(e){
@@ -98,7 +94,7 @@
                }else{
                   document.getElementById("msgBox").innerHTML = '<b>Invalid Move: ' + rval.desc + '</b>';
                }
-               redrawGame(ctx, g);
+               g.redrawGame()
                document.getElementById("moves").innerHTML = g.toHtmlTable();
             }
 
@@ -112,23 +108,10 @@
                   document.getElementById("msgBox").innerHTML = '<b>Invalid Move: ' + ex + '</b>';
                }
 
-               redrawGame(ctx,g);
+               g.redrawGame();
                document.getElementById("moves").innerHTML = g.toHtmlTable();
                document.getElementById('pgnMult').value = '';
             }
-         function redrawGame(ctx, game){
-            ctx.clearRect(0, 0, 512,512);
-            ctx.fillStyle = 'rgb(103,110,39)'
-            // Draw a 500x500 board starting at 0, 0 
-            drawBoard(ctx, 0, 0, 512, 512);
-
-
-            var joined = game.white.concat(game.black);
-
-            for(var i =0; i < joined.length; i++){
-               drawPiece(ctx, joined[i].name, joined[i].color, joined[i].coordsToString());
-            }
-         }
         </script>
     </body>
 </html>
