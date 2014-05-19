@@ -67,7 +67,9 @@ function isSqrInAry(ary, sqr){
 function deepCopyObj(obj){
    var x = {};
    for(var key in obj) {
-      if(obj[key] instanceof Array){
+      if(obj[key] instanceof SingletonContainer){
+         continue;
+      }else if(obj[key] instanceof Array){
          x[key] = deepCopyAry(obj[key]);
       }else if(obj[key] instanceof Function){
          x[key] = obj[key].bind(x);
