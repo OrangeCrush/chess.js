@@ -4,6 +4,7 @@
  * In init, must pass in promote callback and 
  * a 'canvas' element that the game will run on
  * piece_size will scale the size of the board.  default is 64
+ * perspective decides what color starts on bottom..
  */
 function CanvasGameBoard(init){
    /*
@@ -16,16 +17,29 @@ function CanvasGameBoard(init){
    });
 
 
+   this.font = init.font || '15px Arial';
+   this.perspective = init.perspective || 'white';
    this.pieceSize = init.pieceSize || 64;
+
    this.sc.canvas.width = this.sc.canvas.height = this.pieceSize * 8;
    Game.call(this, init); //super
 
    var self = this;
    this.sc.canvas.onclick = function(e){
       e.preventDefault();
-      var x = e.pageX - (self.sc.canvas.offsetLeft + 2);
-      var y = e.pageY - (self.sc.canvas.offsetTop + 2);
-      alert(coordsToPgnSqr(Math.ceil(x / self.pieceSize) - 1, 8 - Math.ceil(y / self.pieceSize)) +' : ' +  x + ' ' + y);
+      var x = e.pageX - self.sc.canvas.offsetLeft;
+      var y = e.pageY - self.sc.canvas.offsetTop;
+
+      //Sometimes you are able to go past the max barriers..not sure why.  but set a boundary here..
+      if(x > self.sc.canvas.width){
+         x = self.sc.canvas.width;  
+      }
+      if(y > self.sc.canvas.height){
+         y = self.sc.canvas.height;
+      }
+
+      var coord = coordsToPgnSqr(Math.ceil(x / self.pieceSize) - 1, 8 - Math.ceil(y / self.pieceSize))
+      this.handleClick(coord);
    };
 
 }
@@ -90,12 +104,12 @@ CanvasGameBoard.prototype.drawBoard = function(startx, starty, width, height){
 
 
 /*
- * Draws a board from perspectives (black|white) perspective
+ * Draws a board from 
  */
-CanvasGameBoard.prototype.redrawGame = function(perspective){
+CanvasGameBoard.prototype.redrawGame = function(){
 
    this.sc.ctx.clearRect(0, 0, this.pieceSize * 8, this.pieceSize * 8);
-   this.sc.ctx.fillStyle = 'rgb(103,110,39)'
+   this.sc.ctx.fillStyle = 'rgb(103,110,39)';
 
    this.drawBoard(0, 0, this.pieceSize * 8, this.pieceSize * 8);
 
@@ -103,8 +117,34 @@ CanvasGameBoard.prototype.redrawGame = function(perspective){
    var joined = this.white.concat(this.black);
 
    for(var i = 0; i < joined.length; i++){
-      this.drawPiece(joined[i].name, joined[i].color, joined[i].coordsToString());
+      if(this.perspective === 'white'){
+         this.drawPiece(joined[i].name, joined[i].color, joined[i].coordsToString());
+      }else{
+         this.drawPiece(joined[i].name, joined[i].color, flipCoord(joined[i].coordsToString()));
+      }
    }
+   this.drawLabels();
+}
+
+CanvasGameBoard.prototype.handleClick = function(sqr){
+   if(this.turn){
+
+   }
+}
+
+CanvasGameBoard.prototype.drawLabels = function(){
+   var sqr_color = this.sc.ctx.fillStyle;
+   this.sc.ctx.font = this.font;
+   this.sc.ctx.fillStyle = 'rgb(0,0,0)';
+   for(var i = 0; i < 8; i++){
+      if(this.perspective === 'white'){
+         this.sc.ctx.fillText(8 - i, 2, (i + 1) * this.pieceSize);
+         this.sc.ctx.fillText(String.fromCharCode('a'.charCodeAt(0) +  i), (i) * this.pieceSize, 10);
+      }else{
+        //todo leaveoff point monday 
+      }
+   }
+   this.sc.ctx.fillStyle = sqr_color;
 }
 
 /*

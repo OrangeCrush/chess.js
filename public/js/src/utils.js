@@ -98,3 +98,11 @@ function deepCopyAry(ary){
    }
    return copy;
 }
+
+/*
+ * re maps coordinates as if you flipped the board around
+ */
+function flipCoord(coordStr){
+   var xy = pgnSqrToCoords(coordStr);
+   return coordsToPgnSqr(7 - xy.x, 7 - xy.y);
+}
