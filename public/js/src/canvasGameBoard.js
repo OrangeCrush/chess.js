@@ -38,10 +38,16 @@ function CanvasGameBoard(init){
       }
 
       var coord = {x: Math.ceil(point.x / self.pieceSize) - 1, y:8 - Math.ceil(point.y / self.pieceSize)};
+      if(self.perspective === 'black'){//flip the coords
+         coord = flipSqr(coord);
+      }
       if(onBoard(coord)){
          self.handleClick(coord);
       }
    };
+
+   this.firstClick = false;
+   this.beingMoved = '';
 }
 extend(Game, CanvasGameBoard);
 
@@ -97,7 +103,6 @@ CanvasGameBoard.prototype.drawBoard = function(startx, starty, width, height){
          }
       }
    }
-
 }
 
 
@@ -127,19 +132,27 @@ CanvasGameBoard.prototype.redrawGame = function(){
 }
 
 CanvasGameBoard.prototype.handleClick = function(sqr){
-   if(this.turn === this.perspective && this.board.squares[sqr.x][sqr.y].occupied){//if it's actually the users turn
+   if(!this.firstClick && this.turn === this.perspective && this.board.squares[sqr.x][sqr.y].occupied){//if it's actually the users turn
       if(this.board.squares[sqr.x][sqr.y].piece.color === this.turn){//If they have clicked on their own piece..
          this.displayMoveSquaresForSquare(sqr);
-         this.firstClick = true;
+      //   this.firstClick = true;
       }
+   }else if(this.firstClick){
+      //if(this.validateMove()){
+      //   this.processMove();
+      //}
    }
 }
 
 CanvasGameBoard.prototype.displayMoveSquaresForSquare = function(sqr){
    this.redrawGame();
    var sqrs = this.getValidMovesForPiece(this.board.squares[sqr.x][sqr.y].piece);
+   this.beingMoved = coordsToPgnSqr(sqr);
    for(var i = 0; i < sqrs.length; i++){
       this.sc.ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      if(this.perspective === 'black'){
+         sqrs[i] = flipSqr(sqrs[i]);
+      }
       this.sc.ctx.fillRect(sqrs[i].x * this.pieceSize, (7 - sqrs[i].y) * this.pieceSize, this.pieceSize, this.pieceSize);
    }
 }

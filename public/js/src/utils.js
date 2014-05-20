@@ -106,3 +106,11 @@ function flipCoord(coordStr){
    var xy = pgnSqrToCoords(coordStr);
    return coordsToPgnSqr(7 - xy.x, 7 - xy.y);
 }
+
+//Flips squares in format {x:6, y:7}
+function flipSqr(sqr){
+   return {
+      x: 7- sqr.x,
+      y: 7 - sqr.y
+   };
+}
