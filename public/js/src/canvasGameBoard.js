@@ -27,21 +27,21 @@ function CanvasGameBoard(init){
    var self = this;
    this.sc.canvas.onclick = function(e){
       e.preventDefault();
-      var x = e.pageX - self.sc.canvas.offsetLeft;
-      var y = e.pageY - self.sc.canvas.offsetTop;
+      var point = self.normalizePoint({x:e.pageX, y: e.pageY});
 
       //Sometimes you are able to go past the max barriers..not sure why.  but set a boundary here..
-      if(x > self.sc.canvas.width){
-         x = self.sc.canvas.width;  
+      if(point.x > self.sc.canvas.width){
+         point.x = self.sc.canvas.width;  
       }
-      if(y > self.sc.canvas.height){
-         y = self.sc.canvas.height;
+      if(point.y > self.sc.canvas.height){
+         point.y = self.sc.canvas.height;
       }
 
-      var coord = coordsToPgnSqr(Math.ceil(x / self.pieceSize) - 1, 8 - Math.ceil(y / self.pieceSize))
-      this.handleClick(coord);
+      var coord = {x: Math.ceil(point.x / self.pieceSize) - 1, y:8 - Math.ceil(point.y / self.pieceSize)};
+      if(onBoard(coord)){
+         self.handleClick(coord);
+      }
    };
-
 }
 extend(Game, CanvasGameBoard);
 
@@ -127,8 +127,20 @@ CanvasGameBoard.prototype.redrawGame = function(){
 }
 
 CanvasGameBoard.prototype.handleClick = function(sqr){
-   if(this.turn){
+   if(this.turn === this.perspective && this.board.squares[sqr.x][sqr.y].occupied){//if it's actually the users turn
+      if(this.board.squares[sqr.x][sqr.y].piece.color === this.turn){//If they have clicked on their own piece..
+         this.displayMoveSquaresForSquare(sqr);
+         this.firstClick = true;
+      }
+   }
+}
 
+CanvasGameBoard.prototype.displayMoveSquaresForSquare = function(sqr){
+   this.redrawGame();
+   var sqrs = this.getValidMovesForPiece(this.board.squares[sqr.x][sqr.y].piece);
+   for(var i = 0; i < sqrs.length; i++){
+      this.sc.ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      this.sc.ctx.fillRect(sqrs[i].x * this.pieceSize, (7 - sqrs[i].y) * this.pieceSize, this.pieceSize, this.pieceSize);
    }
 }
 
@@ -138,13 +150,22 @@ CanvasGameBoard.prototype.drawLabels = function(){
    this.sc.ctx.fillStyle = 'rgb(0,0,0)';
    for(var i = 0; i < 8; i++){
       if(this.perspective === 'white'){
-         this.sc.ctx.fillText(8 - i, 2, (i + 1) * this.pieceSize);
+         this.sc.ctx.fillText(8 - i, 2, (i + 1) * this.pieceSize - this.pieceSize / 2);
          this.sc.ctx.fillText(String.fromCharCode('a'.charCodeAt(0) +  i), (i) * this.pieceSize, 10);
       }else{
-        //todo leaveoff point monday 
+         this.sc.ctx.fillText(i + 1, 2, (i + 1) * this.pieceSize - this.pieceSize / 2);
+         this.sc.ctx.fillText(String.fromCharCode('a'.charCodeAt(0) +   7 - i), (i) * this.pieceSize, 10);
       }
    }
    this.sc.ctx.fillStyle = sqr_color;
+}
+
+CanvasGameBoard.prototype.normalizePoint = function(sqr){
+   var self = this;
+   return {
+      x: sqr.x - self.sc.canvas.offsetLeft,
+      y: sqr.y - self.sc.canvas.offsetTop
+   };
 }
 
 /*
