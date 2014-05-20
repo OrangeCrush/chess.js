@@ -315,14 +315,22 @@ Game.prototype.getMoveSquaresForPiece = function(piece, team){
          squares = this.marchUntilPiece(piece, {up_down: false, diag: true}, 8);
       break;
       case 'N':
-         if(onBoard({x: x + 2, y: y + 1})) squares.push(this.board.squares[x + 2][y + 1]);
-         if(onBoard({x: x + 2, y: y - 1})) squares.push(this.board.squares[x + 2][y - 1]);
-         if(onBoard({x: x - 2, y: y + 1})) squares.push(this.board.squares[x - 2][y + 1]);
-         if(onBoard({x: x - 2, y: y - 1})) squares.push(this.board.squares[x - 2][y - 1]);
-         if(onBoard({x: x + 1, y: y + 2})) squares.push(this.board.squares[x + 1][y + 2]);
-         if(onBoard({x: x + 1, y: y - 2})) squares.push(this.board.squares[x + 1][y - 2]);
-         if(onBoard({x: x - 1, y: y + 2})) squares.push(this.board.squares[x - 1][y + 2]);
-         if(onBoard({x: x - 1, y: y - 2})) squares.push(this.board.squares[x - 1][y - 2]);
+         if(onBoard({x: x + 2, y: y + 1}) && !(this.board.squares[x + 2][y + 1].piece && this.board.squares[x + 2][y + 1].piece.color === team))
+            squares.push(this.board.squares[x + 2][y + 1]);
+         if(onBoard({x: x + 2, y: y - 1}) && !(this.board.squares[x + 2][y - 1].piece && this.board.squares[x + 2][y - 1].piece.color === team))
+            squares.push(this.board.squares[x + 2][y - 1]);
+         if(onBoard({x: x - 2, y: y + 1}) && !(this.board.squares[x - 2][y + 1].piece && this.board.squares[x - 2][y + 1].piece.color === team))
+            squares.push(this.board.squares[x - 2][y + 1]);
+         if(onBoard({x: x - 2, y: y - 1}) && !(this.board.squares[x - 2][y - 1].piece && this.board.squares[x - 2][y - 1].piece.color === team))
+            squares.push(this.board.squares[x - 2][y - 1]);
+         if(onBoard({x: x + 1, y: y + 2}) && !(this.board.squares[x + 1][y + 2].piece && this.board.squares[x + 1][y + 2].piece.color === team))
+            squares.push(this.board.squares[x + 1][y + 2]);
+         if(onBoard({x: x + 1, y: y - 2}) && !(this.board.squares[x + 1][y - 2].piece && this.board.squares[x + 1][y - 2].piece.color === team))
+            squares.push(this.board.squares[x + 1][y - 2]);
+         if(onBoard({x: x - 1, y: y + 2}) && !(this.board.squares[x - 1][y + 2].piece && this.board.squares[x - 1][y + 2].piece.color === team))
+            squares.push(this.board.squares[x - 1][y + 2]);
+         if(onBoard({x: x - 1, y: y - 2}) && !(this.board.squares[x - 1][y - 2].piece && this.board.squares[x - 1][y - 2].piece.color === team))
+            squares.push(this.board.squares[x - 1][y - 2]);
       break;
       case 'K':
          squares = this.marchUntilPiece(piece, {up_down: true, diag: true}, 1);
@@ -337,6 +345,8 @@ Game.prototype.getMoveSquaresForPiece = function(piece, team){
 
 /*
  * Gets the valid moves for a piece.  Useful in interfaces and Ai's
+ * piece | piece
+ * x | sqr
  */
 Game.prototype.getValidMovesForPiece = function(piece){
    var game = this;
