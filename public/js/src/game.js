@@ -1,5 +1,5 @@
 function Game(init){
-   this.promote = init.promote; //Pass in a function to promote pawns
+   this.promote = init.promote || function(piece){ piece.name = 'Q'; }; //Pass in a function to promote pawns
    this.board = new Board();
    this.newGame();
 }
