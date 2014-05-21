@@ -48,6 +48,7 @@ function CanvasGameBoard(init){
 
    this.firstClick = false;
    this.beingMoved = '';
+   this.highlighted = [];
 }
 extend(Game, CanvasGameBoard);
 
@@ -75,7 +76,7 @@ CanvasGameBoard.prototype.drawPiece = function(piece, color, sqr){
       'K':5
    };
 
-   colors = {
+   var colors = {
       'white':0,
       'black':1
    }
@@ -106,8 +107,6 @@ CanvasGameBoard.prototype.drawBoard = function(startx, starty, width, height){
 }
 
 
-
-
 /*
  * Draws a board from 
  */
@@ -132,21 +131,36 @@ CanvasGameBoard.prototype.redrawGame = function(){
 }
 
 CanvasGameBoard.prototype.handleClick = function(sqr){
-   if(!this.firstClick && this.turn === this.perspective && this.board.squares[sqr.x][sqr.y].occupied){//if it's actually the users turn
-      if(this.board.squares[sqr.x][sqr.y].piece.color === this.turn){//If they have clicked on their own piece..
+   if(this.turn === this.perspective){//if it's actually the users turn
+      if(!this.clickedPiece && this.board.squares[sqr.x][sqr.y].piece && this.board.squares[sqr.x][sqr.y].piece.color === this.turn){//If they have clicked on their own piece..
+         this.clickedPiece = this.board.squares[sqr.x][sqr.y].piece;
          this.displayMoveSquaresForSquare(sqr);
-      //   this.firstClick = true;
+      }else if(this.perspective === 'white' && this.clickedPiece && isSqrInAry(this.highlighted, sqr)){//if they clicked on a highlighted sqr and are white
+         var customPgn = this.clickedPiece.coordsToString() + '-'  + coordsToPgnSqr(sqr.x,sqr.y);
+         if(this.validateMove(customPgn, this.turn)){
+            this.processMove(customPgn, this.turn);
+         }
+         this.clickedPiece = null;
+         this.redrawGame();//clicked off
+      }else if(this.perspective === 'black' && this.clickedPiece && isSqrInAry(this.highlighted, flipSqr(sqr))){//clicked on highlighted and are black
+         var customPgn = this.clickedPiece.coordsToString() + '-'  + coordsToPgnSqr(sqr.x,sqr.y);
+         if(this.validateMove(customPgn, this.turn)){
+            this.processMove(customPgn, this.turn);
+         }
+         this.clickedPiece = null;
+         this.redrawGame();//clicked off
+          
+      }else{//clicked off so just get rid of highlight
+         this.clickedPiece = null;
+         this.redrawGame();//clicked off
       }
-   }else if(this.firstClick){
-      //if(this.validateMove()){
-      //   this.processMove();
-      //}
    }
 }
 
 CanvasGameBoard.prototype.displayMoveSquaresForSquare = function(sqr){
    this.redrawGame();
    var sqrs = this.getValidMovesForPiece(this.board.squares[sqr.x][sqr.y].piece);
+   this.highlighted = sqrs;
    this.beingMoved = coordsToPgnSqr(sqr);
    for(var i = 0; i < sqrs.length; i++){
       this.sc.ctx.fillStyle = 'rgba(0,0,0,0.5)';
