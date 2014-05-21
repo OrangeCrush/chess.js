@@ -132,9 +132,14 @@ CanvasGameBoard.prototype.redrawGame = function(){
 
 CanvasGameBoard.prototype.handleClick = function(sqr){
    if(this.turn === this.perspective){//if it's actually the users turn
-      if(!this.clickedPiece && this.board.squares[sqr.x][sqr.y].piece && this.board.squares[sqr.x][sqr.y].piece.color === this.turn){//If they have clicked on their own piece..
-         this.clickedPiece = this.board.squares[sqr.x][sqr.y].piece;
-         this.displayMoveSquaresForSquare(sqr);
+      if(this.board.squares[sqr.x][sqr.y].piece && this.board.squares[sqr.x][sqr.y].piece.color === this.turn){//If they have clicked on their own piece..
+         if(this.clickedPiece && this.clickedPiece.equals(this.board.squares[sqr.x][sqr.y].piece)){//clicked on same piece
+            this.clickedPiece = null;
+            this.redrawGame();
+         }else{//clicked on new piece
+            this.clickedPiece = this.board.squares[sqr.x][sqr.y].piece;
+            this.displayMoveSquaresForSquare(sqr);
+         }
       }else if(this.clickedPiece && (this.perspective === 'white' && isSqrInAry(this.highlighted, sqr)
                || this.perspective === 'black' && isSqrInAry(this.highlighted, flipSqr(sqr)))){//if they clicked on a highlighted sqr and are white
          var customPgn = this.clickedPiece.coordsToString() + '-'  + coordsToPgnSqr(sqr.x,sqr.y);
