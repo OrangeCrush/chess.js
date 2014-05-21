@@ -295,11 +295,11 @@ Game.prototype.getMoveSquaresForPiece = function(piece, team){
          }
 
          //check the diagonals for a capture
-         if(onBoard({x: x + 1, y: y + 1 * teamFactor}) && this.board.squares[x + 1][y + 1 * teamFactor].occupied){
+         if(onBoard({x: x + 1, y: y + 1 * teamFactor}) && this.board.squares[x + 1][y + 1 * teamFactor].occupied && this.board.squares[x + 1][y + 1 * teamFactor].piece.color !== team){
             squares.push(this.board.squares[x + 1][y + 1 * teamFactor]);
          }
 
-         if(onBoard({x: x - 1, y: y + 1 * teamFactor}) && this.board.squares[x - 1][y + 1 * teamFactor].occupied){
+         if(onBoard({x: x - 1, y: y + 1 * teamFactor}) && this.board.squares[x - 1][y + 1 * teamFactor].occupied && this.board.squares[x - 1][y + 1 * teamFactor].piece.color !== team){
             squares.push(this.board.squares[x - 1][y + 1 * teamFactor]);
          }
 
