@@ -124,10 +124,10 @@ Game.prototype.canCastle = function(pgn, team){
    var king, rook, canCastle;
    if(team === 'black'){
       king = this.blackKing;
-      canCastle = this.blackCastle && this.blackCheck;
+      canCastle = this.blackCastle && !this.blackCheck;
    }else if(team === 'white'){
       king = this.whiteKing;
-      canCastle = this.whiteCastle && this.whiteCheck;
+      canCastle = this.whiteCastle && !this.whiteCheck;
    }else{
       throw 'Team passed to canCastle does not match /(black|white)/';
    }
@@ -345,14 +345,28 @@ Game.prototype.getMoveSquaresForPiece = function(piece, team){
 
 /*
  * Gets the valid moves for a piece.  Useful in interfaces and Ai's
+ * Also adds A castle square for the king if he can castle
  * piece | piece
  * x | sqr
  */
 Game.prototype.getValidMovesForPiece = function(piece){
    var game = this;
-   return this.getMoveSquaresForPiece(piece, piece.color).filter(function(x){
+   var moves = this.getMoveSquaresForPiece(piece, piece.color).filter(function(x){
       return !game.moveResultsInCheck(piece, x, piece.color);
    });
+
+   if(piece.name === 'K'){
+      if(this.canCastle('O-O-O', piece.color)){
+         //add c1 and c8 for king
+         moves.push( piece.color === 'white' ? this.board.squares[2][0] : this.board.squares[2][7]);
+      }
+      if(this.canCastle('O-O', piece.color)){
+         //add g1 and g8 for king
+         moves.push( piece.color === 'white' ? this.board.squares[6][0] : this.board.squares[6][7]);
+      }
+   }
+
+   return moves;
 }
 
 /*
@@ -598,4 +612,38 @@ Game.prototype.canPromote = function(piece){
    return (piece.name === 'P'  &&
            ((piece.ypos === 0 && piece.color === 'black' ) ||
             (piece.ypos === 7 && piece.color === 'white' )));
+}
+
+/*
+ * Since getValidMovesForPiece adds in castling,
+ * this method takes a kind and a move and sees if it actually is 
+ * a castle.  Returns either the pgn passed or transforms
+ * it to O-O or O-O-O
+ *
+ * customPgn || 'd3-d4'
+ */
+Game.prototype.isPgnMoveCastle = function(king, customPgn){
+   var ary = customPgn.split('-');
+   if(king.color === 'black'){
+      if(ary[1] === 'c8'){
+         if(this.canCastle('O-O-O', 'black')){
+            customPgn = 'O-O-O';
+         }
+      }else if(ary[1] === 'g8'){
+         if(this.canCastle('O-O', 'black')){
+            customPgn = 'O-O';
+         }
+      }
+   }else{
+      if(ary[1] === 'c1'){
+         if(this.canCastle('O-O-O', 'white')){
+            customPgn = 'O-O-O';
+         }
+      }else if(ary[1] === 'g1'){
+         if(this.canCastle('O-O', 'white')){
+            customPgn = 'O-O';
+         }
+      }
+   }
+   return customPgn;
 }

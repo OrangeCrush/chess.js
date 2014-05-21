@@ -143,6 +143,9 @@ CanvasGameBoard.prototype.handleClick = function(sqr){
       }else if(this.clickedPiece && (this.perspective === 'white' && isSqrInAry(this.highlighted, sqr)
                || this.perspective === 'black' && isSqrInAry(this.highlighted, flipSqr(sqr)))){//if they clicked on a highlighted sqr and are white
          var customPgn = this.clickedPiece.coordsToString() + '-'  + coordsToPgnSqr(sqr.x,sqr.y);
+         if(this.clickedPiece.name === 'K'){//Check if the mvoe was a castle, and transform pgn if it was
+            customPgn = this.isPgnMoveCastle(this.clickedPiece, customPgn);
+         }
          if(this.validateMove(customPgn, this.turn)){
             this.processMove(customPgn, this.turn);
          }
