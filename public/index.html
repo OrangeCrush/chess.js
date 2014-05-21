@@ -49,7 +49,6 @@
         <script src="js/src/board.js"></script>
         <script src="js/src/game.js"></script>
         <script src="js/src/pgn.js"></script>
-        <script src="js/src/canvas.js"></script>
         <script src="js/src/canvasGameBoard.js"></script>
 
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
@@ -65,11 +64,11 @@
            var canvas = document.getElementsByTagName('canvas')[0];
            var g = new CanvasGameBoard({
                promote: function(piece){
-                  return 'Q';
+                  piece.name = 'Q';
                }, 
                canvas: canvas,
                perspective: 'white',
-               pieceSize: (64 + 32) /2,
+               pieceSize: 64,
                font: '15px Arial'
             });
             g.redrawGame();
