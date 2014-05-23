@@ -56,8 +56,10 @@ require(['socket.io.min', 'CanvasGameBoard'], function(socket, CanvasGameBoard){
     * Display the new move
     */
    socket.on('newMove', function(data){
-      canvasGame.processMove(data.pgnMove, data.color);
-      canvasGame.redrawGame();
+      if(canvasGame.perspective !== data.color){
+         canvasGame.processMove(data.pgnMove, data.color);
+         canvasGame.redrawGame();
+      }
    });
 
    socket.on('badMove', function(data){
