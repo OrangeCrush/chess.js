@@ -11,6 +11,9 @@ define(function(require, exports, module){
     * a 'canvas' element that the game will run on
     * piece_size will scale the size of the board.  default is 64
     * perspective decides what color starts on bottom..
+    *
+    * init.moveCallBack is called when the user clicks and makes
+    * their move.
     */
    function CanvasGameBoard(init){
       /*
@@ -22,6 +25,7 @@ define(function(require, exports, module){
          images : {}
       });
 
+      this.moveCallBack = init.moveCallBack;
 
       this.font = init.font || '15px Arial';
       this.perspective = init.perspective || 'white';
@@ -155,6 +159,10 @@ define(function(require, exports, module){
                   customPgn = this.isPgnMoveCastle(this.clickedPiece, customPgn);
                }
                if(this.validateMove(customPgn, this.turn)){
+                  this.moveCallBack({
+                     pgn:customPgn,
+                     color: this.turn
+                  });
                   this.processMove(customPgn, this.turn);
                }
                this.clickedPiece = null;

@@ -88,8 +88,8 @@ define(function(require, exports, module){
     * re maps coordinates as if you flipped the board around
     */
    exports.flipCoord = function(coordStr){
-      var xy = pgnSqrToCoords(coordStr);
-      return coordsToPgnSqr(7 - xy.x, 7 - xy.y);
+      var xy = this.pgnSqrToCoords(coordStr);
+      return this.coordsToPgnSqr(7 - xy.x, 7 - xy.y);
    }
 
    //Flips squares in format {x:6, y:7}

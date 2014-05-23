@@ -44,13 +44,8 @@
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.2.min.js"><\/script>')</script>
-        <script src="js/src/utils.js"></script>
-        <script src="js/src/piece.js"></script>
-        <script src="js/src/board.js"></script>
-        <script src="js/src/game.js"></script>
-        <script src="js/src/pgn.js"></script>
-        <script src="js/src/canvasGameBoard.js"></script>
 
+        <script data-main="js/main" src="js/require.js"></script>
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
         <script>
             (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
@@ -61,58 +56,58 @@
             ga('create','UA-XXXXX-X');ga('send','pageview');
         </script>
         <script>
-           var canvas = document.getElementsByTagName('canvas')[0];
-           var g = new CanvasGameBoard({
-               promote: function(piece){
-                  piece.name = 'Q';
-               }, 
-               canvas: canvas,
-               perspective: 'white',
-               pieceSize: 64,
-               font: '15px Arial'
-            });
-            g.redrawGame();
+          // var canvas = document.getElementsByTagName('canvas')[0];
+          // var g = new CanvasGameBoard({
+          //     promote: function(piece){
+          //        piece.name = 'Q';
+          //     }, 
+          //     canvas: canvas,
+          //     perspective: 'white',
+          //     pieceSize: 64,
+          //     font: '15px Arial'
+          //  });
+          //  g.redrawGame();
 
-            document.getElementById('pgnBlock').onsubmit = function(e){
-               e.preventDefault();
-               var pgn = new PGN({pgn:document.getElementById('pgnArea').value});
-               for(var i=0; i < pgn.parsedPGN.length; i++){
-                  for(var j=0; j < pgn.parsedPGN[i].length; j++){
-                     pgn.runToken(pgn.parsedPGN[i][j]);
-                  }
-               }
-               g.redrawGame();
-            }
+          //  document.getElementById('pgnBlock').onsubmit = function(e){
+          //     e.preventDefault();
+          //     var pgn = new PGN({pgn:document.getElementById('pgnArea').value});
+          //     for(var i=0; i < pgn.parsedPGN.length; i++){
+          //        for(var j=0; j < pgn.parsedPGN[i].length; j++){
+          //           pgn.runToken(pgn.parsedPGN[i][j]);
+          //        }
+          //     }
+          //     g.redrawGame();
+          //  }
 
-            document.getElementById("moveForm").onsubmit = function(e){
-               e.preventDefault(); 
-               document.getElementById("msgBox").innerHTML = '';
-               var pgn = document.getElementById("pgn").value;
-               document.getElementById("pgn").value = '';
-               var rval = g.validateMove(pgn, g.turn);
-               if(rval.valid){
-                  g.processMove(pgn, g.turn);
-               }else{
-                  document.getElementById("msgBox").innerHTML = '<b>Invalid Move: ' + rval.desc + '</b>';
-               }
-               g.redrawGame()
-               document.getElementById("moves").innerHTML = g.toHtmlTable();
-            }
+          //  document.getElementById("moveForm").onsubmit = function(e){
+          //     e.preventDefault(); 
+          //     document.getElementById("msgBox").innerHTML = '';
+          //     var pgn = document.getElementById("pgn").value;
+          //     document.getElementById("pgn").value = '';
+          //     var rval = g.validateMove(pgn, g.turn);
+          //     if(rval.valid){
+          //        g.processMove(pgn, g.turn);
+          //     }else{
+          //        document.getElementById("msgBox").innerHTML = '<b>Invalid Move: ' + rval.desc + '</b>';
+          //     }
+          //     g.redrawGame()
+          //     document.getElementById("moves").innerHTML = g.toHtmlTable();
+          //  }
 
-            document.getElementById("multMove").onsubmit = function(e){
-               e.preventDefault();
-               document.getElementById("msgBox").innerHTML = '';
-               var pgn = document.getElementById('pgnMult').value;
-               try{
-                  g.runMoves(pgn.split(' ')); //todo this ends up working pretty awful
-               }catch(ex){
-                  document.getElementById("msgBox").innerHTML = '<b>Invalid Move: ' + ex + '</b>';
-               }
+          //  document.getElementById("multMove").onsubmit = function(e){
+          //     e.preventDefault();
+          //     document.getElementById("msgBox").innerHTML = '';
+          //     var pgn = document.getElementById('pgnMult').value;
+          //     try{
+          //        g.runMoves(pgn.split(' ')); //todo this ends up working pretty awful
+          //     }catch(ex){
+          //        document.getElementById("msgBox").innerHTML = '<b>Invalid Move: ' + ex + '</b>';
+          //     }
 
-               g.redrawGame();
-               document.getElementById("moves").innerHTML = g.toHtmlTable();
-               document.getElementById('pgnMult').value = '';
-            }
+          //     g.redrawGame();
+          //     document.getElementById("moves").innerHTML = g.toHtmlTable();
+          //     document.getElementById('pgnMult').value = '';
+          //  }
         </script>
     </body>
 </html>
