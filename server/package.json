@@ -1,6 +1,10 @@
 {
    "name":"chess.js",
    "dependencies":{
-      "express": "latest"
+      "express": "latest",
+      "socket.io" : "latest",
+      "socket.io-client" : "latest",
+      "amdefine" : "latest",
+      "requirejs" : "latest"
    }
 }
