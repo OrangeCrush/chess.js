@@ -187,11 +187,11 @@ define(function(require, exports, module){
       this.highlighted = sqrs;
       this.beingMoved = Utils.coordsToPgnSqr(sqr);
       for(var i = 0; i < sqrs.length; i++){
-         this.sc.ctx.fillStyle = 'rgba(0,0,0,0.5)';
+         this.sc.ctx.fillStyle = 'rgba(0,0,128,0.5)';
          if(this.perspective === 'black'){
             sqrs[i] = Utils.flipSqr(sqrs[i]);
          }
-         this.sc.ctx.fillRect(sqrs[i].x * this.pieceSize, (7 - sqrs[i].y) * this.pieceSize, this.pieceSize, this.pieceSize);
+         this.sc.ctx.fillRect(this.drawBoardX + sqrs[i].x * this.pieceSize, this.drawBoardY + (7 - sqrs[i].y) * this.pieceSize, this.pieceSize, this.pieceSize);
       }
    }
 
@@ -214,8 +214,8 @@ define(function(require, exports, module){
    CanvasGameBoard.prototype.normalizePoint = function(sqr){
       var self = this;
       return {
-         x: sqr.x - self.sc.canvas.offsetLeft,
-         y: sqr.y - self.sc.canvas.offsetTop
+         x: sqr.x - self.sc.canvas.offsetLeft - this.drawBoardX,
+         y: sqr.y - self.sc.canvas.offsetTop - this.drawBoardY
       };
    }
 
