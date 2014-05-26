@@ -31,13 +31,31 @@ require.config({
    }
 });
 require(['socket.io.min', 'CanvasGameBoard'], function(socket, CanvasGameBoard){
-   var socket = io.connect('http://localhost:3000');
+   var socket = io.connect('http://192.168.1.132:3000');
    var canvasGame;
-   var gameId;
+
+   //Cute little period animation
+   var count = 0;
+   var waitTextel = document.getElementById('textAnimation');
+   var orig = waitTextel.innerHTML;
+   var periodPid = setInterval(function(){
+      if(++count % 6 !== 0){
+         waitTextel.innerHTML += '.';
+      }else{
+         waitTextel.innerHTML = orig;
+         count = 0; //dont want overflows now do we
+      }
+   },500);
+
    socket.on('startGame', function(data){
+      clearInterval(periodPid);
+      var canvas = document.getElementsByTagName('canvas')[0];
+      canvas.style.display = '';
+      document.getElementById('waitingScreen').style.display = 'none';
+
       gameId = data.gameId;
       canvasGame = new CanvasGameBoard({
-         canvas: document.getElementsByTagName('canvas')[0],
+         canvas: canvas,
          perspective: data.color,
          /*
           * This gets called when the user makes a move..
@@ -65,5 +83,9 @@ require(['socket.io.min', 'CanvasGameBoard'], function(socket, CanvasGameBoard){
    socket.on('badMove', function(data){
      //RollBack state of game and display a message promptly yelling       at the user
      console.log('Bad move detected');
+   });
+
+   socket.on('closingRoom', function(data){
+      //Idk what to do yet really  
    });
 });
