@@ -10,7 +10,7 @@ define(function(require, exports, module){
     * player sockets as well as game validation and setting up
     */
    function GameRoomManager(init){
-      this.games = [];
+      this.games = {};
       this.waiting = [];
       this.iosockets = init.iosockets;
    }
@@ -29,12 +29,11 @@ define(function(require, exports, module){
     */
    GameRoomManager.prototype.generateNewGame = function(player1Socket, player2Socket, gameOpts){
       var id = this.generateId();
-      this.games.push({
-         id: id,
+      this.games[id] = {
          game: new Game(),
          player1: player1Socket,
          player2: player2Socket
-      });
+      };
 
       //Spin off a socketio room
       player1Socket.join(id);
@@ -56,7 +55,7 @@ define(function(require, exports, module){
    }
 
    GameRoomManager.prototype.runMove = function(id, color, pgnMove){
-      var room = this.getGameById(id);
+      var room = this.games[id];
       var game = room.game;
       var erMsg;
       if((erMsg = game.validateMove(pgnMove, color)).valid){
@@ -96,10 +95,9 @@ define(function(require, exports, module){
       }
    }
 
-   GameRoomManager.prototype.getGameById = function(id){
-      return this.games.filter(function(x){
-         return x.id === id;
-      })[0];
+   GameRoomManager.prototype.destroyRoom = function(id){
+      this.iosockets.in(id).emit('closingRoom');
+      this.games[id] = null;
    }
 
    return GameRoomManager;
