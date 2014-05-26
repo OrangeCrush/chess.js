@@ -31,7 +31,8 @@ define(function(require, exports, module){
       this.perspective = init.perspective || 'white';
       this.pieceSize = init.pieceSize || 64;
 
-      this.sc.canvas.width = this.sc.canvas.height = this.pieceSize * 8;
+      this.sc.canvas.height = this.pieceSize * 8 ;
+      this.sc.canvas.width = this.pieceSize * 8 * 2;  //Allow for two side pannels
       Game.call(this, init); //super
 
       var self = this;
@@ -60,6 +61,9 @@ define(function(require, exports, module){
       this.beingMoved = '';
       this.highlighted = [];
 
+      //Where to draw the board starting from
+      this.drawBoardX = init.drawBoardX || this.sc.canvas.width / 4;
+      this.drawBoardY = init.drawBoardY || 0;
       this.redrawGame();
    }
    Utils.extend(Game, CanvasGameBoard);
@@ -98,7 +102,7 @@ define(function(require, exports, module){
       this.loadImage('img/sprite.png', function(img){
          //img, src.x, src.y, width, height, dest.x, dest.y, width, height
          //Basically a hardcode with img/sprite.png
-         self.sc.ctx.drawImage(img, 64 * pieces[piece], colors[color] * 64, 64,64, coords.x * self.pieceSize, (7 - coords.y) * self.pieceSize, self.pieceSize, self.pieceSize);
+         self.sc.ctx.drawImage(img, 64 * pieces[piece], colors[color] * 64, 64, 64, self.drawBoardX + (coords.x * self.pieceSize), self.drawBoardY + (7 - coords.y) * self.pieceSize, self.pieceSize, self.pieceSize);
       });
    }
 
@@ -116,6 +120,9 @@ define(function(require, exports, module){
             }
          }
       }
+      this.sc.ctx.strokeStyle = 'black';
+      this.sc.ctx.rect(this.drawBoardX,this.drawBoardY,this.pieceSize * 8,this.pieceSize * 8);
+      this.sc.ctx.stroke();
    }
 
 
@@ -124,10 +131,10 @@ define(function(require, exports, module){
     */
    CanvasGameBoard.prototype.redrawGame = function(){
 
-      this.sc.ctx.clearRect(0, 0, this.pieceSize * 8, this.pieceSize * 8);
+      this.sc.ctx.clearRect(this.drawBoardX, this.drawBoardY, this.pieceSize * 8, this.pieceSize * 8);
       this.sc.ctx.fillStyle = 'rgb(103,110,39)';
 
-      this.drawBoard(0, 0, this.pieceSize * 8, this.pieceSize * 8);
+      this.drawBoard(this.drawBoardX, this.drawBoardY, this.pieceSize * 8, this.pieceSize * 8);
 
 
       var joined = this.white.concat(this.black);
@@ -194,11 +201,11 @@ define(function(require, exports, module){
       this.sc.ctx.fillStyle = 'rgb(0,0,0)';
       for(var i = 0; i < 8; i++){
          if(this.perspective === 'white'){
-            this.sc.ctx.fillText(8 - i, 2, (i + 1) * this.pieceSize - this.pieceSize / 2);
-            this.sc.ctx.fillText(String.fromCharCode('a'.charCodeAt(0) +  i), (i) * this.pieceSize, 10);
+            this.sc.ctx.fillText(8 - i, this.drawBoardX + 2, this.drawBoardY + (i + 1) * this.pieceSize - this.pieceSize / 2);
+            this.sc.ctx.fillText(String.fromCharCode('a'.charCodeAt(0) +  i), this.drawBoardX + (i) * this.pieceSize + 3, this.drawBoardY + 15);
          }else{
-            this.sc.ctx.fillText(i + 1, 2, (i + 1) * this.pieceSize - this.pieceSize / 2);
-            this.sc.ctx.fillText(String.fromCharCode('a'.charCodeAt(0) +   7 - i), (i) * this.pieceSize, 10);
+            this.sc.ctx.fillText(i + 1, this.drawBoardX + 2, this.drawBoardY + (i + 1) * this.pieceSize - this.pieceSize / 2);
+            this.sc.ctx.fillText(String.fromCharCode('a'.charCodeAt(0) +   7 - i), this.drawBoardX + (i) * this.pieceSize + 3, this.drawBoardY + 15);
          }
       }
       this.sc.ctx.fillStyle = sqr_color;
