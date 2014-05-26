@@ -14,6 +14,7 @@
 
         <link rel="stylesheet" href="css/normalize.css">
         <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/styles.css">
         <script src="js/vendor/modernizr-2.6.2.min.js"></script>
     </head>
     <body>
@@ -21,27 +22,15 @@
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
-        <!-- Add your site or application content here -->
-        
-        <form id ="moveForm">
-           <input id='pgn' type='text' />
-           <input id='move' type='submit' value='Move'/>
-        </form>
-        <div id='msgBox'></div>
-        <canvas style="border-style: solid; border-width: 2px;"></canvas>
-        <div id='moves'></div>
-        <h3></h3>
-        <form id ="multMove">
-           <textarea id='pgnMult' rows="10"></textarea>
-           <input id='moveMult' type='submit' value='Move'/>
-           <a href="http://www.chessgames.com/">ChessGames.com</a>
-        </form>
-        <h3>PGN:</h3>
-        <form id ="pgnBlock">
-           <textarea id='pgnArea' rows="10"></textarea>
-           <input id='runGame' type='submit' value='Run Game'/>
-        </form>
+        <div id='waitingScreen' class='center' style='max-width:512px; margin-top: 10%;'>
+           <img class='center' src='img/loading.gif'></img>
+           <p id='textAnimation'>Please wait while we match you to another player.<p>
+        </div>
+        <div>
+           <canvas class='center' style="margin-top:5%; border-style: solid; border-width: 2px; display:none;"></canvas>
+        </div>
 
+        <!-- Add your site or application content here -->
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.2.min.js"><\/script>')</script>
 
@@ -54,60 +43,6 @@
             e.src='//www.google-analytics.com/analytics.js';
             r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
             ga('create','UA-XXXXX-X');ga('send','pageview');
-        </script>
-        <script>
-          // var canvas = document.getElementsByTagName('canvas')[0];
-          // var g = new CanvasGameBoard({
-          //     promote: function(piece){
-          //        piece.name = 'Q';
-          //     }, 
-          //     canvas: canvas,
-          //     perspective: 'white',
-          //     pieceSize: 64,
-          //     font: '15px Arial'
-          //  });
-          //  g.redrawGame();
-
-          //  document.getElementById('pgnBlock').onsubmit = function(e){
-          //     e.preventDefault();
-          //     var pgn = new PGN({pgn:document.getElementById('pgnArea').value});
-          //     for(var i=0; i < pgn.parsedPGN.length; i++){
-          //        for(var j=0; j < pgn.parsedPGN[i].length; j++){
-          //           pgn.runToken(pgn.parsedPGN[i][j]);
-          //        }
-          //     }
-          //     g.redrawGame();
-          //  }
-
-          //  document.getElementById("moveForm").onsubmit = function(e){
-          //     e.preventDefault(); 
-          //     document.getElementById("msgBox").innerHTML = '';
-          //     var pgn = document.getElementById("pgn").value;
-          //     document.getElementById("pgn").value = '';
-          //     var rval = g.validateMove(pgn, g.turn);
-          //     if(rval.valid){
-          //        g.processMove(pgn, g.turn);
-          //     }else{
-          //        document.getElementById("msgBox").innerHTML = '<b>Invalid Move: ' + rval.desc + '</b>';
-          //     }
-          //     g.redrawGame()
-          //     document.getElementById("moves").innerHTML = g.toHtmlTable();
-          //  }
-
-          //  document.getElementById("multMove").onsubmit = function(e){
-          //     e.preventDefault();
-          //     document.getElementById("msgBox").innerHTML = '';
-          //     var pgn = document.getElementById('pgnMult').value;
-          //     try{
-          //        g.runMoves(pgn.split(' ')); //todo this ends up working pretty awful
-          //     }catch(ex){
-          //        document.getElementById("msgBox").innerHTML = '<b>Invalid Move: ' + ex + '</b>';
-          //     }
-
-          //     g.redrawGame();
-          //     document.getElementById("moves").innerHTML = g.toHtmlTable();
-          //     document.getElementById('pgnMult').value = '';
-          //  }
         </script>
     </body>
 </html>
