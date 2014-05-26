@@ -8,7 +8,6 @@ define(function(require, exports, module){
 
    function Game(init){
       this.promote = (init && init.promote) || function(piece){ piece.name = 'Q'; }; //Pass in a function to promote pawns
-      this.board = new Board();
       this.newGame();
    }
 
@@ -33,6 +32,9 @@ define(function(require, exports, module){
       //Used for validating pgn basically true for 1 turn after a promotion
       this.whitePromotion = false;
       this.blackPromotion = false;
+
+      this.whiteCaptured = [];
+      this.blackCaptured = [];
 
       for(var i = 0; i < 8; i++){
 
@@ -194,6 +196,7 @@ define(function(require, exports, module){
     * Changes the state of a game (After validation..)
     * Assume validation has passed already
     * Calls this.promote on pawn promotion
+    * Appends captured pieces to the coresponding array
     */
    Game.prototype.processMove = function(pgn, team){
       var captured;
@@ -205,6 +208,11 @@ define(function(require, exports, module){
          var sqr_from = this.board.squares[coord_from.x][coord_from.y];
          var sqr_to   = this.board.squares[coord_to.x][coord_to.y]; 
          captured = this.movePiece(sqr_from, sqr_to);
+
+         if(captured){
+               var capary = team === 'black' ? this.blackCaptured : this.whiteCaptured;
+               capary.push(captured);
+         }
 
          if(this.canPromote(sqr_to.piece)){
             this.promote(sqr_to.piece);

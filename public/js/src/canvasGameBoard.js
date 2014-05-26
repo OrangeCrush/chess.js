@@ -82,28 +82,10 @@ define(function(require, exports, module){
       }
    }
 
-   CanvasGameBoard.prototype.drawPiece = function(piece, color, sqr){
-      var pieces = {
-         'P':0,
-         'B':1,
-         'N':2,
-         'R':3,
-         'Q':4,
-         'K':5
-      };
-
-      var colors = {
-         'white':0,
-         'black':1
-      }
-
+   CanvasGameBoard.prototype.drawPieceOnBoard = function(piece, color, sqr){
       var coords = Utils.pgnSqrToCoords(sqr);
       var self = this;
-      this.loadImage('img/sprite.png', function(img){
-         //img, src.x, src.y, width, height, dest.x, dest.y, width, height
-         //Basically a hardcode with img/sprite.png
-         self.sc.ctx.drawImage(img, 64 * pieces[piece], colors[color] * 64, 64, 64, self.drawBoardX + (coords.x * self.pieceSize), self.drawBoardY + (7 - coords.y) * self.pieceSize, self.pieceSize, self.pieceSize);
-      });
+      this.drawPieceAt(piece, color, this.drawBoardX + (coords.x * this.pieceSize), this.drawBoardY + (7 - coords.y) * this.pieceSize);
    }
 
    CanvasGameBoard.prototype.drawBoard = function(startx, starty, width, height){
@@ -120,9 +102,8 @@ define(function(require, exports, module){
             }
          }
       }
-      this.sc.ctx.strokeStyle = 'black';
-      this.sc.ctx.rect(this.drawBoardX,this.drawBoardY,this.pieceSize * 8,this.pieceSize * 8);
-      this.sc.ctx.stroke();
+      this.sc.ctx.strokeStyle = 'rgb(0,0,0)';
+      this.sc.ctx.strokeRect(this.drawBoardX,this.drawBoardY,this.pieceSize * 8,this.pieceSize * 8);
    }
 
 
@@ -141,12 +122,14 @@ define(function(require, exports, module){
 
       for(var i = 0; i < joined.length; i++){
          if(this.perspective === 'white'){
-            this.drawPiece(joined[i].name, joined[i].color, joined[i].coordsToString());
+            this.drawPieceOnBoard(joined[i].name, joined[i].color, joined[i].coordsToString());
          }else{
-            this.drawPiece(joined[i].name, joined[i].color, Utils.flipCoord(joined[i].coordsToString()));
+            this.drawPieceOnBoard(joined[i].name, joined[i].color, Utils.flipCoord(joined[i].coordsToString()));
          }
       }
       this.drawLabels();
+      this.drawCaptured();
+      var self = this;
    }
 
    CanvasGameBoard.prototype.handleClick = function(sqr){
@@ -217,6 +200,51 @@ define(function(require, exports, module){
          x: sqr.x - self.sc.canvas.offsetLeft - this.drawBoardX,
          y: sqr.y - self.sc.canvas.offsetTop - this.drawBoardY
       };
+   }
+
+   CanvasGameBoard.prototype.drawCaptured = function(){
+      var self = this;
+
+      var row = 1;
+      var capAry = this.perspective === 'white' ? this.whiteCaptured : this.blackCaptured;
+      for(var i = 0 ; i < capAry.length; i++){//draw own captured
+         this.drawPieceAt(capAry[i].name, Utils.otherTeam(this.perspective), this.pieceSize * (i % 4), this.pieceSize * (8 - row));
+         if((i + 1) % 4 === 0){
+            row++;
+         }
+      }
+
+      var capAry = this.perspective === 'white' ? this.blackCaptured : this.whiteCaptured;
+      row = 0;
+      for(var i = 0 ; i < capAry.length; i++){//draw other team's captured
+         this.drawPieceAt(capAry[i].name, this.perspective, this.pieceSize * (i % 4), this.pieceSize * (row));
+         if((i + 1) % 4 === 0){
+            row++;
+         }
+      }
+   }
+
+   CanvasGameBoard.prototype.drawPieceAt = function(piece, color, x, y){
+      var pieces = {
+         'P':0,
+         'B':1,
+         'N':2,
+         'R':3,
+         'Q':4,
+         'K':5
+      };
+
+      var colors = {
+         'white':0,
+         'black':1
+      };
+
+      var self = this;
+      this.loadImage('img/sprite.png', function(img){
+         //img, src.x, src.y, width, height, (<- from sprite)
+         //dest.x, dest.y, width, height     (<- drawing to board)
+         self.sc.ctx.drawImage(img, 64 * pieces[piece], colors[color] * 64, 64, 64, x, y, self.pieceSize, self.pieceSize);
+      });
    }
 
    return CanvasGameBoard;
