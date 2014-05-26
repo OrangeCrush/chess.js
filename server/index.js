@@ -42,12 +42,24 @@ var gm = new GameRoomManager({
 
 //Every 5 seconds gather players and create games
 setInterval(function(){
+   gm.waiting.map(function(x){
+      return x.connected;            
+   });
    var numGames = Math.floor(gm.waiting.length / 2);
    console.log('Starting ' + numGames + ' new games');
    for(var i = 0; i < numGames; i++){
       console.log('Created game with id:' +  gm.generateNewGame(gm.waiting.shift(), gm.waiting.shift(), null)); //TODO idk how to handle game options yet
    }
 }, 5000);
+
+setInterval(function(){
+   for(var i = 0; i < gm.games.length; i++){
+      console.log(gm[i].player1.connected)
+      if(!gm.games[i].player1.connected || !gm.games[i].player2.connected){
+         gm.destroyRoom(gm.games[i].id);
+      }
+   }
+}, 1000);
 
 io.sockets.on('connection', function(socket){
    socket.emit('connected', {timestamp: new Date()});
@@ -61,7 +73,6 @@ io.sockets.on('connection', function(socket){
 
    //Todo don't let someone else run a move.. etc
    socket.on('move', function(data){
-      console.log('checking move: '  + data.pgnMove);
       gm.runMove(data.id, data.color, data.pgnMove);
    });
 
@@ -71,6 +82,10 @@ io.sockets.on('connection', function(socket){
 
    socket.on('gameOver', function(data){
       //todo..
+   });
+
+   socket.on('disconnected', function(data){
+
    });
 });
 
