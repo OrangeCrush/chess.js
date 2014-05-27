@@ -22,7 +22,7 @@ var express = require('express'),
     server = require('http').createServer(app),
     io = require('socket.io').listen(server);
 
-io.set('log level', 3);
+io.set('log level', 0);
 
 var GameRoomManager = requirejs('GameRoomManager');
 
@@ -42,26 +42,35 @@ var gm = new GameRoomManager({
 
 //Every 5 seconds gather players and create games
 setInterval(function(){
-   gm.waiting.map(function(x){
-      return x.connected;            
-   });
-   var numGames = Math.floor(gm.waiting.length / 2);
+   var queue = [];
+   for(var id in gm.waiting){
+      if(!gm.disconnected[id]){//queue up connected players
+         queue.push(gm.waiting[id])
+      }else{//remove diconnected players from queue
+         console.log('filtered disconnected player: ' + id);
+         delete gm.disconnected[id];
+      }
+      delete gm.waiting[id]; //remove from waiting list
+   }
+
+   var numGames = Math.floor(queue.length / 2);
    console.log('Starting ' + numGames + ' new games');
    for(var i = 0; i < numGames; i++){
-      console.log('Created game with id:' +  gm.generateNewGame(gm.waiting.shift(), gm.waiting.shift(), null)); //TODO idk how to handle game options yet
+      var gameid = gm.generateNewGame(queue.shift(), queue.shift(), null);
+      console.log('Created game with id:' +  gameid); //TODO idk how to handle game options yet
+      console.log('    player1: ' + gm.games[gameid].player1.id);
+      console.log('    player2: ' + gm.games[gameid].player2.id);
    }
+   if(queue.length > 0){
+      gm.waiting[queue[0].id] = queue[0];//push back the odd player out
+   }
+
+   console.log('Printing Waiting queue:')
+   console.log(Object.keys(gm.waiting));
 }, 5000);
 
-setInterval(function(){
-   for(var i = 0; i < gm.games.length; i++){
-      console.log(gm[i].player1.connected)
-      if(!gm.games[i].player1.connected || !gm.games[i].player2.connected){
-         gm.destroyRoom(gm.games[i].id);
-      }
-   }
-}, 1000);
-
 io.sockets.on('connection', function(socket){
+   console.log(socket.id + ' is up.');
    socket.emit('connected', {timestamp: new Date()});
 
    //Places the player in the game queue and begins socket communication
@@ -77,15 +86,20 @@ io.sockets.on('connection', function(socket){
    });
 
    socket.on('chat', function(data){
-      //todo..
+      io.sockets.in(data.id).emit(data.msg);
    });
 
    socket.on('gameOver', function(data){
       //todo..
    });
 
-   socket.on('disconnected', function(data){
-
+   /*
+    * Add them to a disconnected queue to be removed in
+    * the interval (don't want to remove them from the same array)
+    */
+   socket.on('disconnect', function(data){
+      console.log(socket.id + ' is down.');
+      gm.playerDisconnected(socket);
    });
 });
 

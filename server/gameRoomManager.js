@@ -10,8 +10,26 @@ define(function(require, exports, module){
     * player sockets as well as game validation and setting up
     */
    function GameRoomManager(init){
+      /*
+       * {
+       *    GameID:{
+       *       game: [Game object],
+       *       player1: [Socket object],
+       *       player2: [Socket object]
+       *    },...
+       * }
+       */
       this.games = {};
-      this.waiting = [];
+
+      /*
+       * {
+       *    socketId:[Socket Object]
+       * }
+       */
+      this.waiting = {}
+      this.disconnected = {};
+
+      //All sockets (for broadcasting to rooms)
       this.iosockets = init.iosockets;
    }
 
@@ -19,7 +37,7 @@ define(function(require, exports, module){
     * queue up waiting player's sockets.
     */
    GameRoomManager.prototype.joinGame = function(playerSocket){
-      this.waiting.push(playerSocket);
+      this.waiting[playerSocket.id] = playerSocket;
    }
 
    /*
@@ -100,5 +118,14 @@ define(function(require, exports, module){
       this.games[id] = null;
    }
 
+   GameRoomManager.prototype.playerDisconnected = function(playerSocket){
+      //check if the player was waiting
+     if(this.waiting[playerSocket.id]){
+        this.disconnected[playerSocket.id] = playerSocket; //delete in interval to avoid concurrency issues
+     }else{//the player was in a game
+        //find the game
+
+     }
+   }
    return GameRoomManager;
 });
