@@ -261,7 +261,7 @@ define(function(require, exports, module){
       var movestr = []
       var tempMoves = Utils.deepCopyAry(this.moves);
       while(tempMoves.length > 0){
-         movestr.push([tempMoves.unshift(),tempMoves.unshift()]);
+         movestr.push([tempMoves.shift(),tempMoves.shift()]);
       }
       for(var i = 0 ; i < movestr.length; i++){
          this.sc.ctx.fillText(movestr[i][0], leftMargin + this.pieceSize * 8 + this.drawBoardX, i * fontsize + this.pieceSize * 2);
