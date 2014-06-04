@@ -102,7 +102,8 @@ define(function(require, exports, module){
             }
          }
       }
-      this.sc.ctx.strokeStyle = 'rgb(0,0,0)';
+      this.sc.ctx.strokeStyle = 'black';
+      this.sc.ctx.lineWidth = 3;
       this.sc.ctx.strokeRect(this.drawBoardX,this.drawBoardY,this.pieceSize * 8,this.pieceSize * 8);
    }
 
@@ -112,7 +113,7 @@ define(function(require, exports, module){
     */
    CanvasGameBoard.prototype.redrawGame = function(){
 
-      this.sc.ctx.clearRect(this.drawBoardX, this.drawBoardY, this.pieceSize * 8, this.pieceSize * 8);
+      this.sc.ctx.clearRect(0, 0, this.pieceSize * 8 * 2, this.pieceSize * 8);
       this.sc.ctx.fillStyle = 'rgb(103,110,39)';
 
       this.drawBoard(this.drawBoardX, this.drawBoardY, this.pieceSize * 8, this.pieceSize * 8);
@@ -129,7 +130,7 @@ define(function(require, exports, module){
       }
       this.drawLabels();
       this.drawCaptured();
-      var self = this;
+      this.drawStats();
    }
 
    CanvasGameBoard.prototype.handleClick = function(sqr){
@@ -185,10 +186,10 @@ define(function(require, exports, module){
       for(var i = 0; i < 8; i++){
          if(this.perspective === 'white'){
             this.sc.ctx.fillText(8 - i, this.drawBoardX + 2, this.drawBoardY + (i + 1) * this.pieceSize - this.pieceSize / 2);
-            this.sc.ctx.fillText(String.fromCharCode('a'.charCodeAt(0) +  i), this.drawBoardX + (i) * this.pieceSize + 3, this.drawBoardY + 15);
+            this.sc.ctx.fillText(String.fromCharCode('a'.charCodeAt(0) +  i), this.drawBoardX + (i) * this.pieceSize + 3, this.drawBoardY + 12);
          }else{
             this.sc.ctx.fillText(i + 1, this.drawBoardX + 2, this.drawBoardY + (i + 1) * this.pieceSize - this.pieceSize / 2);
-            this.sc.ctx.fillText(String.fromCharCode('a'.charCodeAt(0) +   7 - i), this.drawBoardX + (i) * this.pieceSize + 3, this.drawBoardY + 15);
+            this.sc.ctx.fillText(String.fromCharCode('a'.charCodeAt(0) +   7 - i), this.drawBoardX + (i) * this.pieceSize + 3, this.drawBoardY + 12);
          }
       }
       this.sc.ctx.fillStyle = sqr_color;
@@ -245,6 +246,29 @@ define(function(require, exports, module){
          //dest.x, dest.y, width, height     (<- drawing to board)
          self.sc.ctx.drawImage(img, 64 * pieces[piece], colors[color] * 64, 64, 64, x, y, self.pieceSize, self.pieceSize);
       });
+   }
+
+   /*
+    * Draw some stats of the game on the rhs of the canvas
+    */
+   CanvasGameBoard.prototype.drawStats = function(){
+      var fontsize = this.pieceSize / 4; //approximate this
+      this.sc.ctx.font = fontsize + 'px Arial';
+      this.sc.ctx.fillStyle = 'rgb(0,0,0)';
+
+      var leftMargin = 10;
+      this.sc.ctx.fillText(this.turn + "'s Move.", leftMargin + this.pieceSize * 8 + this.drawBoardX, 64);
+      var movestr = []
+      var tempMoves = Utils.deepCopyAry(this.moves);
+      while(tempMoves.length > 0){
+         movestr.push([tempMoves.unshift(),tempMoves.unshift()]);
+      }
+      for(var i = 0 ; i < movestr.length; i++){
+         this.sc.ctx.fillText(movestr[i][0], leftMargin + this.pieceSize * 8 + this.drawBoardX, i * fontsize + this.pieceSize * 2);
+         if(movestr[i][1]){
+            this.sc.ctx.fillText(movestr[i][1], leftMargin + this.pieceSize * 8 + this.drawBoardX + this.pieceSize, i * fontsize + this.pieceSize * 2);
+         }
+      }
    }
 
    return CanvasGameBoard;

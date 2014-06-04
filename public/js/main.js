@@ -31,8 +31,9 @@ require.config({
    }
 });
 require(['socket.io.min', 'CanvasGameBoard'], function(socket, CanvasGameBoard){
-   var socket = io.connect('http://192.168.1.132:3000');
+   var socket = io.connect('http://localhost:3000');
    var canvasGame;
+   var connectedAt;
 
    //Cute little period animation
    var count = 0;
@@ -47,15 +48,22 @@ require(['socket.io.min', 'CanvasGameBoard'], function(socket, CanvasGameBoard){
       }
    },500);
 
+   socket.on('connected', function(data){
+      connectedAt = data.timestamp;
+      console.log('connected at ' +  data.timestamp);      
+   });
+
    socket.on('startGame', function(data){
       clearInterval(periodPid);
       var canvas = document.getElementsByTagName('canvas')[0];
-      canvas.style.display = '';
+      //var gameWrapper = document.getElementById('gameWrapper');
+      //gameWrapper.style.display = '';
       document.getElementById('waitingScreen').style.display = 'none';
 
       gameId = data.gameId;
       canvasGame = new CanvasGameBoard({
          canvas: canvas,
+         pieceSize: 54,
          perspective: data.color,
          /*
           * This gets called when the user makes a move..
