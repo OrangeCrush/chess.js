@@ -335,8 +335,8 @@ define(function(require, exports, module){
             squares.push(this.board.squares[x - 1][y + 1 * teamFactor]);
          }
 
-         //If the pawn hasn't moved yet, let it move two
-         if(piece.initialPos && Utils.onBoard({x:x, y: y + 2 * teamFactor}) && !this.board.squares[x][y + 2 * teamFactor].occupied){
+         //If the pawn hasn't moved yet, let it move two (and its not blocked!)
+         if(piece.initialPos && Utils.onBoard({x:x, y: y + 2 * teamFactor}) && !this.board.squares[x][y + 2 * teamFactor].occupied && !this.board.squares[x][y + 1 * teamFactor].occupied){
             squares.push(this.board.squares[x][y + 2 * teamFactor]);
          }
          break;
