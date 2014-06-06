@@ -161,13 +161,13 @@ define(function(require, exports, module){
          if(pgn === 'O-O-O'){ //Queenside
             if(team === 'black'){
                rook = this.board.squares[0][7].piece;
-               return rook.initialPos && !this.blackCheck &&
+               return rook && rook.initialPos && !this.blackCheck &&
                   !this.board.squares[1][7].occupied && 
                   !this.board.squares[2][7].occupied && !this.moveResultsInCheck(king, this.board.squares[2][7], team) &&
                   !this.board.squares[3][7].occupied && !this.moveResultsInCheck(king, this.board.squares[3][7], team);
             }else{
                rook = this.board.squares[0][0].piece;
-               return rook.initialPos && !this.whiteCheck && 
+               return rook && rook.initialPos && !this.whiteCheck && 
                   !this.board.squares[1][0].occupied && 
                   !this.board.squares[2][0].occupied && !this.moveResultsInCheck(king, this.board.squares[2][0], team) &&
                   !this.board.squares[3][0].occupied && !this.moveResultsInCheck(king, this.board.squares[3][0], team);
@@ -175,12 +175,12 @@ define(function(require, exports, module){
          }else if(pgn === 'O-O'){ //Kingside
             if(team === 'black'){
                rook = this.board.squares[7][7].piece;
-               return rook.initialPos && !this.blackCheck &&
+               return rook && rook.initialPos && !this.blackCheck &&
                   !this.board.squares[6][7].occupied && !this.moveResultsInCheck(king, this.board.squares[6][7], team) &&
                   !this.board.squares[5][7].occupied && !this.moveResultsInCheck(king, this.board.squares[5][7], team);
             }else{
                rook = this.board.squares[7][0].piece;
-               return rook.initialPos && !this.whiteCheck &&
+               return rook && rook.initialPos && !this.whiteCheck &&
                   !this.board.squares[6][0].occupied && !this.moveResultsInCheck(king, this.board.squares[6][0], team) &&
                   !this.board.squares[5][0].occupied && !this.moveResultsInCheck(king, this.board.squares[5][0], team);
             }
