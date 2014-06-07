@@ -30,8 +30,8 @@ require.config({
 
    }
 });
-require(['socket.io.min', 'CanvasGameBoard'], function(socket, CanvasGameBoard){
-   var socket = io.connect('http://localhost:3000');
+require(['socket.io.min', 'CanvasGameBoard'], function(io, CanvasGameBoard){
+   var socket = io('http://localhost:3000');
    var canvasGame;
    var connectedAt;
 
@@ -63,7 +63,6 @@ require(['socket.io.min', 'CanvasGameBoard'], function(socket, CanvasGameBoard){
       gameId = data.gameId;
       canvasGame = new CanvasGameBoard({
          canvas: canvas,
-         pieceSize: 54,
          perspective: data.color,
          /*
           * This gets called when the user makes a move..
