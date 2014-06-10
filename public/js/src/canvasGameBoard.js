@@ -118,6 +118,7 @@ define(function(require, exports, module){
 
       this.drawBoard(this.drawBoardX, this.drawBoardY, this.pieceSize * 8, this.pieceSize * 8);
 
+      this.drawLastMove(); //Want the last move to be highlighted under the piece not above
 
       var joined = this.white.concat(this.black);
 
@@ -267,6 +268,27 @@ define(function(require, exports, module){
          this.sc.ctx.fillText(movestr[i][0], leftMargin + this.pieceSize * 8 + this.drawBoardX, i * fontsize + this.pieceSize * 2);
          if(movestr[i][1]){
             this.sc.ctx.fillText(movestr[i][1], leftMargin + this.pieceSize * 8 + this.drawBoardX + this.pieceSize, i * fontsize + this.pieceSize * 2);
+         }
+      }
+   }
+
+   /*
+    * Draws a red square under the last move made by either side.
+    */
+   CanvasGameBoard.prototype.drawLastMove = function(){
+      if(this.moves.length > 0){
+         this.sc.ctx.fillStyle = 'rgba(255, 64, 64, 0.5)'; //Redish-pink
+         var move = '';
+         move = this.moves[this.moves.length - 1];
+         if(move !== 'O-O-O' && move !== 'O-O'){
+            move = move.slice(move.indexOf('-') + 1, move.length);
+            if(this.perspective === 'black'){
+               move = Utils.flipCoord(move);
+            }
+            var coord = Utils.pgnSqrToCoords(move);
+            this.sc.ctx.fillRect(this.drawBoardX + this.pieceSize * coord.x, this.drawBoardY + this.pieceSize * (7 - coord.y), this.pieceSize, this.pieceSize);
+         }else{//idk castle
+
          }
       }
    }
