@@ -132,6 +132,7 @@ define(function(require, exports, module){
       this.drawLabels();
       this.drawCaptured();
       this.drawStats();
+      this.pickAndDrawGameAlert();
    }
 
    CanvasGameBoard.prototype.handleClick = function(sqr){
@@ -258,18 +259,30 @@ define(function(require, exports, module){
       this.sc.ctx.fillStyle = 'rgb(0,0,0)';
 
       var leftMargin = 10;
-      this.sc.ctx.fillText(this.turn + "'s Move.", leftMargin + this.pieceSize * 8 + this.drawBoardX, 64);
+      //this.sc.ctx.fillText(this.turn + "'s Move.", leftMargin + this.pieceSize * 8 + this.drawBoardX, 64);
       var movestr = []
       var tempMoves = Utils.deepCopyAry(this.moves);
       while(tempMoves.length > 0){
          movestr.push([tempMoves.shift(),tempMoves.shift()]);
       }
-      for(var i = 0 ; i < movestr.length; i++){
-         this.sc.ctx.fillText(movestr[i][0], leftMargin + this.pieceSize * 8 + this.drawBoardX, i * fontsize + this.pieceSize * 2);
+      for(var i = 0; i < movestr.length; i++){
+         this.sc.ctx.fillText(movestr[i][0], leftMargin + this.pieceSize * 8 + this.drawBoardX, i * fontsize + this.pieceSize );
          if(movestr[i][1]){
-            this.sc.ctx.fillText(movestr[i][1], leftMargin + this.pieceSize * 8 + this.drawBoardX + this.pieceSize, i * fontsize + this.pieceSize * 2);
+            this.sc.ctx.fillText(movestr[i][1], leftMargin + this.pieceSize * 8 + this.drawBoardX + this.pieceSize, i * fontsize + this.pieceSize);
          }
       }
+   }
+
+   /*
+    * Draw messages for the user just above the moves
+    */
+   CanvasGameBoard.prototype.drawGameAlert = function(msg){
+      var fontsize = this.pieceSize / 3; //approximate this
+      this.sc.ctx.font = fontsize + 'px Arial';
+      this.sc.ctx.fillStyle = 'rgb(0,0,0)';
+      var leftmargin = 10;
+      var topmargin = this.pieceSize / 4;
+      this.sc.ctx.fillText(msg, leftmargin + this.pieceSize * 8 + this.drawBoardX, topmargin);
    }
 
    /*
@@ -291,6 +304,23 @@ define(function(require, exports, module){
 
          }
       }
+   }
+
+   /*
+    * Checks for check / stale / mate
+    */
+   CanvasGameBoard.prototype.pickAndDrawGameAlert = function(){
+      var msg = this.turn + "'s move.";
+      
+      if(this.isCheckMateForTeam(this.turn).checkmate){
+         msg = 'Checkmate! (' + this.turn + ')';
+      }else if(this.whiteCheck){
+         msg = 'Check! (White)';
+      }else if(this.blackCheck){
+         msg = 'Check! (Black)';
+      }
+
+      this.drawGameAlert(msg);
    }
 
    return CanvasGameBoard;

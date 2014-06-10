@@ -380,6 +380,8 @@ define(function(require, exports, module){
     * Also adds A castle square for the king if he can castle
     * piece | piece
     * x | sqr
+    *
+    * returns an array of movesquares ()
     */
    Game.prototype.getValidMovesForPiece = function(piece){
       var game = this;
@@ -547,16 +549,17 @@ define(function(require, exports, module){
     */
    Game.prototype.isCheckMateForTeam = function(team){
       var king   = team === 'white' ? this.whiteKing : this.blackKing;
-      var moves = this.getMoveSquaresForPiece(king, team);
       var check = team === 'white' ? this.whiteCheck : this.blackCheck;
 
       //Assume it's checkmate until we find a move that does not result in check
       var checkmate = true;
-      for(var i = 0; i < moves.length; i++){
-         //&&= and &= are not defined as operators in Ecmascript
-         checkmate = checkmate && this.moveResultsInCheck(king, this.board.squares[moves[i].x][moves[i].y], team);
-      }
 
+      var self = this;
+      this.allMovesForTeam(team, function(piece, validMoves){
+         for(var i = 0; checkmate && i < validMoves.length; i++){
+            checkmate = checkmate && self.moveResultsInCheck(piece, validMoves[i], team);
+         }
+      })
       return {
          checkmate: check && checkmate,
          stalemate: !check && checkmate /*TODO also need to make sure no other pieces can move..? Stalemate is hard */
@@ -678,6 +681,22 @@ define(function(require, exports, module){
          }
       }
       return customPgn;
+   }
+
+   /*
+    * Returns all possible moves for the given team.
+    * Used in detecting checkmate as well as in AI's to search
+    *
+    * Offers up a callback:
+    *
+    * function(piece, valid_moves)
+    */
+   Game.prototype.allMovesForTeam = function(team, each){
+      var moves = [];
+      var teamAry = team === 'black' ? this.black : this.white;
+      for(var i = 0; i < teamAry.length; i++){
+         each(teamAry[i], this.getValidMovesForPiece(teamAry[i]));
+      }
    }
 
    //Expose Game
