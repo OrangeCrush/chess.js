@@ -56,8 +56,7 @@ require(['socket.io.min', 'CanvasGameBoard'], function(io, CanvasGameBoard){
    socket.on('startGame', function(data){
       clearInterval(periodPid);
       var canvas = document.getElementsByTagName('canvas')[0];
-      //var gameWrapper = document.getElementById('gameWrapper');
-      //gameWrapper.style.display = '';
+      canvas.style.display = '';
       document.getElementById('waitingScreen').style.display = 'none';
 
       gameId = data.gameId;
