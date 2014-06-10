@@ -22,7 +22,6 @@ var express = require('express'),
     server = require('http').createServer(app),
     io = require('socket.io').listen(server);
 
-io.set('log level', 0);
 
 var GameRoomManager = requirejs('GameRoomManager');
 
