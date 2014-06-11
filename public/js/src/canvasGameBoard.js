@@ -114,6 +114,8 @@ define(function(require, exports, module){
    CanvasGameBoard.prototype.redrawGame = function(){
 
       this.sc.ctx.clearRect(0, 0, this.pieceSize * 8 * 2, this.pieceSize * 8);
+      this.sc.ctx.fillStyle = 'rgb(255,255,255)';
+      this.sc.ctx.fillRect(0,0, this.sc.canvas.width, this.sc.canvas.height);
       this.sc.ctx.fillStyle = 'rgb(103,110,39)';
 
       this.drawBoard(this.drawBoardX, this.drawBoardY, this.pieceSize * 8, this.pieceSize * 8);
