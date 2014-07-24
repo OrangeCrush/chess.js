@@ -114,9 +114,9 @@ define(function(require, exports, module){
    CanvasGameBoard.prototype.redrawGame = function(){
 
       this.sc.ctx.clearRect(0, 0, this.pieceSize * 8 * 2, this.pieceSize * 8);
-      this.sc.ctx.fillStyle = 'rgb(255,255,255)';
+      this.sc.ctx.fillStyle = 'rgb(242,200,133)';
       this.sc.ctx.fillRect(0,0, this.sc.canvas.width, this.sc.canvas.height);
-      this.sc.ctx.fillStyle = 'rgb(103,110,39)';
+      this.sc.ctx.fillStyle = 'rgb(110,64,0)';
 
       this.drawBoard(this.drawBoardX, this.drawBoardY, this.pieceSize * 8, this.pieceSize * 8);
 
@@ -302,8 +302,52 @@ define(function(require, exports, module){
             }
             var coord = Utils.pgnSqrToCoords(move);
             this.sc.ctx.fillRect(this.drawBoardX + this.pieceSize * coord.x, this.drawBoardY + this.pieceSize * (7 - coord.y), this.pieceSize, this.pieceSize);
-         }else{//idk castle
+         }else{//draw the castle squares
+            var col1, col2, row;
+            if(this.perspective === 'white'){
+               if(Utils.otherTeam(this.turn) === 'white'){
+                  row = 7; //bottom row is actually 7 from a graphics perspective
+                  if(move === 'O-O'){//white Kingside from white's perspective
+                     col1 = 5;
+                     col2 = 6;
+                  }else{//white Queenside from white's perspective
+                     col1 = 2;
+                     col2 = 3;
+                  }
+               }else{//Black has castled from white's perspective
+                  row = 0;
+                  if(move === 'O-O'){//black Kingside from white's perspective
+                     col1 = 5;
+                     col2 = 6;
+                  }else{//black Queenside from white's perspective
+                     col1 = 2;
+                     col2 = 3;
+                  }
+               }
+            }else{//Black Castle
+               if(Utils.otherTeam(this.turn) === 'white'){
+                  row = 0; //top row
+                  if(move === 'O-O'){//white Kingside from black's perspective
+                     col1 = 1;
+                     col2 = 2;
+                  }else{//white Queenside from blacks's perspective
+                     col1 = 4;
+                     col2 = 5;
+                  }
+               }else{//Black has castled from blacks's perspective
+                  row = 7;
+                  if(move === 'O-O'){//black Kingside from white's perspective
+                     col1 = 1;
+                     col2 = 2;
+                  }else{//black Queenside from white's perspective
+                     col1 = 4;
+                     col2 = 5;
+                  }
+               }
 
+            }
+            this.sc.ctx.fillRect(this.drawBoardX + this.pieceSize * col1, this.drawBoardY + this.pieceSize * row, this.pieceSize, this.pieceSize);
+            this.sc.ctx.fillRect(this.drawBoardX + this.pieceSize * col2, this.drawBoardY + this.pieceSize * row, this.pieceSize, this.pieceSize);
          }
       }
    }
