@@ -2,6 +2,8 @@ define(function(require, exports, module){
    var Game = require('Game');
    var Utils = require('Utils');
    var SingletonContainer = require('SingletonContainer');
+   var BLACK = 'rgb(0,0,0)';
+   var WHITE = 'rgb(255,255,255)';
 
 
    /*
@@ -64,6 +66,14 @@ define(function(require, exports, module){
       //Where to draw the board starting from
       this.drawBoardX = init.drawBoardX || this.sc.canvas.width / 4;
       this.drawBoardY = init.drawBoardY || 0;
+      
+
+      this.lightColor = init.lightColor || 'rgb(242,200,133)'; //beige
+      this.darkColor = init.darkColor   || 'rgb(110,64,0)'; //Marble
+      this.highlightColor  = init.highlightColor   || 'rgba(0,0,128,0.5)'; //blue
+      this.moveColor  = init.moveColor   || 'rgba(255,64,64,0.5)'; //pink
+      this.labelColor  = init.labelColor   || 'rgba(255,85,0,1)'; //lime green
+
       this.redrawGame();
    }
    Utils.extend(Game, CanvasGameBoard);
@@ -93,10 +103,18 @@ define(function(require, exports, module){
          for(var j = 0; j < 8; j++){ //Rows
             if(i % 2 == 0){
                if(j % 2 == 0){
+                  this.sc.ctx.fillStyle = this.darkColor;
+                  this.sc.ctx.fillRect(startx + i * width / 8 , starty + j * height / 8, width / 8, height / 8);
+               }else{
+                  this.sc.ctx.fillStyle = this.lightColor;
                   this.sc.ctx.fillRect(startx + i * width / 8 , starty + j * height / 8, width / 8, height / 8);
                }
             }else{
                if(j % 2 != 0){
+                  this.sc.ctx.fillStyle = this.darkColor;
+                  this.sc.ctx.fillRect(startx + i * width / 8 , starty + j * height / 8, width / 8, height / 8);
+               }else{
+                  this.sc.ctx.fillStyle = this.lightColor;
                   this.sc.ctx.fillRect(startx + i * width / 8 , starty + j * height / 8, width / 8, height / 8);
                }
             }
@@ -114,9 +132,8 @@ define(function(require, exports, module){
    CanvasGameBoard.prototype.redrawGame = function(){
 
       this.sc.ctx.clearRect(0, 0, this.pieceSize * 8 * 2, this.pieceSize * 8);
-      this.sc.ctx.fillStyle = 'rgb(242,200,133)';
+      this.sc.ctx.fillStyle = WHITE;
       this.sc.ctx.fillRect(0,0, this.sc.canvas.width, this.sc.canvas.height);
-      this.sc.ctx.fillStyle = 'rgb(110,64,0)';
 
       this.drawBoard(this.drawBoardX, this.drawBoardY, this.pieceSize * 8, this.pieceSize * 8);
 
@@ -175,7 +192,7 @@ define(function(require, exports, module){
       this.highlighted = sqrs;
       this.beingMoved = Utils.coordsToPgnSqr(sqr);
       for(var i = 0; i < sqrs.length; i++){
-         this.sc.ctx.fillStyle = 'rgba(0,0,128,0.5)';
+         this.sc.ctx.fillStyle = this.moveColor;
          if(this.perspective === 'black'){
             sqrs[i] = Utils.flipSqr(sqrs[i]);
          }
@@ -184,9 +201,8 @@ define(function(require, exports, module){
    }
 
    CanvasGameBoard.prototype.drawLabels = function(){
-      var sqr_color = this.sc.ctx.fillStyle;
-      this.sc.ctx.font = this.font;
-      this.sc.ctx.fillStyle = 'rgb(0,0,0)';
+      this.sc.ctx.font = 'Bold ' + this.font;
+      this.sc.ctx.fillStyle = this.labelColor;
       for(var i = 0; i < 8; i++){
          if(this.perspective === 'white'){
             this.sc.ctx.fillText(8 - i, this.drawBoardX + 2, this.drawBoardY + (i + 1) * this.pieceSize - this.pieceSize / 2);
@@ -196,14 +212,13 @@ define(function(require, exports, module){
             this.sc.ctx.fillText(String.fromCharCode('a'.charCodeAt(0) +   7 - i), this.drawBoardX + (i) * this.pieceSize + 3, this.drawBoardY + 12);
          }
       }
-      this.sc.ctx.fillStyle = sqr_color;
    }
 
    CanvasGameBoard.prototype.normalizePoint = function(sqr){
       var self = this;
       return {
-         x: sqr.x - self.sc.canvas.offsetLeft - this.drawBoardX,
-         y: sqr.y - self.sc.canvas.offsetTop - this.drawBoardY
+         x: sqr.x - self.sc.canvas.offsetLeft - self.drawBoardX,
+         y: sqr.y - self.sc.canvas.offsetTop - self.drawBoardY
       };
    }
 
@@ -258,10 +273,10 @@ define(function(require, exports, module){
    CanvasGameBoard.prototype.drawStats = function(){
       var fontsize = this.pieceSize / 4; //approximate this
       this.sc.ctx.font = fontsize + 'px Arial';
-      this.sc.ctx.fillStyle = 'rgb(0,0,0)';
+      this.sc.ctx.fillStyle = BLACK;
 
       var leftMargin = 10;
-      //this.sc.ctx.fillText(this.turn + "'s Move.", leftMargin + this.pieceSize * 8 + this.drawBoardX, 64);
+      
       var movestr = []
       var tempMoves = Utils.deepCopyAry(this.moves);
       while(tempMoves.length > 0){
@@ -281,7 +296,7 @@ define(function(require, exports, module){
    CanvasGameBoard.prototype.drawGameAlert = function(msg){
       var fontsize = this.pieceSize / 3; //approximate this
       this.sc.ctx.font = fontsize + 'px Arial';
-      this.sc.ctx.fillStyle = 'rgb(0,0,0)';
+      this.sc.ctx.fillStyle = BLACK;
       var leftmargin = 10;
       var topmargin = this.pieceSize / 4;
       this.sc.ctx.fillText(msg, leftmargin + this.pieceSize * 8 + this.drawBoardX, topmargin);
@@ -292,7 +307,7 @@ define(function(require, exports, module){
     */
    CanvasGameBoard.prototype.drawLastMove = function(){
       if(this.moves.length > 0){
-         this.sc.ctx.fillStyle = 'rgba(255, 64, 64, 0.5)'; //Redish-pink
+         this.sc.ctx.fillStyle = this.highlightColor;
          var move = '';
          move = this.moves[this.moves.length - 1];
          if(move !== 'O-O-O' && move !== 'O-O'){
