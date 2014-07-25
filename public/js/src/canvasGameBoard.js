@@ -70,8 +70,8 @@ define(function(require, exports, module){
 
       this.lightColor = init.lightColor || 'rgb(242,200,133)'; //beige
       this.darkColor = init.darkColor   || 'rgb(110,64,0)'; //Marble
-      this.highlightColor  = init.highlightColor   || 'rgba(0,0,128,0.5)'; //blue
-      this.moveColor  = init.moveColor   || 'rgba(255,64,64,0.5)'; //pink
+      this.moveColor  = init.moveColor   || 'rgba(0,0,128,0.5)'; //blue
+      this.highlightColor  = init.highlightColor   || 'rgba(255,64,64,0.5)'; //pink
       this.labelColor  = init.labelColor   || 'rgba(255,85,0,1)'; //lime green
 
       this.redrawGame();
