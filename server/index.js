@@ -11,6 +11,7 @@ requirejs.config({
       Piece: '../public/js/src/piece',
       Utils: '../public/js/src/utils',
       SingletonContainer: '../public/js/src/singletonContainer',
+      ChessTimer: '../public/js/src/chessTimer',
       GameRoomManager: 'gameRoomManager'
    },
    baseUrl: __dirname,

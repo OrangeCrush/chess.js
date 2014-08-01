@@ -48,7 +48,9 @@ define(function(require, exports, module){
    GameRoomManager.prototype.generateNewGame = function(player1Socket, player2Socket, gameOpts){
       var id = this.generateId();
       this.games[id] = {
-         game: new Game(),
+         game: new Game({
+            timed: true               //TODO need a way to pass options
+         }),
          player1: player1Socket,
          player2: player2Socket
       };
