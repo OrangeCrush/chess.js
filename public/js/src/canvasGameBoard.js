@@ -74,6 +74,10 @@ define(function(require, exports, module){
       this.highlightColor  = init.highlightColor   || 'rgba(255,64,64,0.5)'; //pink
       this.labelColor  = init.labelColor   || 'rgba(255,85,0,1)'; //lime green
 
+      this.sc.timer.onTimerTick = function(){
+         self.drawTime();
+      }
+
       this.redrawGame();
    }
    Utils.extend(Game, CanvasGameBoard);
@@ -152,6 +156,7 @@ define(function(require, exports, module){
       this.drawCaptured();
       this.drawStats();
       this.pickAndDrawGameAlert();
+      this.drawTime();
    }
 
    CanvasGameBoard.prototype.handleClick = function(sqr){
@@ -382,6 +387,20 @@ define(function(require, exports, module){
       }
 
       this.drawGameAlert(msg);
+   }
+
+   CanvasGameBoard.prototype.drawTime = function(){
+      if(this.timed){
+           var fontsize = this.pieceSize / 4;
+           this.sc.ctx.font = fontsize + 'px Arial';
+           var leftmargin = 10;
+           var topmargin = this.pieceSize / 4 * 2; //Place directly below game Alert
+           var time = this.turn === 'white' ? this.sc.timer.whiteTime : this.sc.timer.blackTime;
+           this.sc.ctx.fillStyle = WHITE;
+           this.sc.ctx.fillRect(leftmargin + this.pieceSize * 8 + this.drawBoardX, topmargin / 2, this.pieceSize * 8 / 2, fontsize);
+           this.sc.ctx.fillStyle = BLACK;
+           this.sc.ctx.fillText(this.sc.timer.toString(), leftmargin + this.pieceSize * 8 + this.drawBoardX, topmargin);
+      }
    }
 
    return CanvasGameBoard;

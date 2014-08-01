@@ -6,6 +6,7 @@ require.config({
       Utils: 'src/utils',
       CanvasGameBoard: 'src/canvasGameBoard',
       SingletonContainer: 'src/singletonContainer',
+      ChessTimer: 'src/chessTimer'
    },
    shim:{
       Game:{
@@ -23,6 +24,10 @@ require.config({
       CanvasGameBoard:{
          exports: 'CanvasGameBoard',
          deps:['Game']
+      },
+      ChessTimer:{
+         exports: 'ChessTimer',
+         deps:['Utils']
       },
       Utils:{
          exports: 'Utils'
@@ -72,7 +77,8 @@ require(['socket.io.min', 'CanvasGameBoard'], function(io, CanvasGameBoard){
                color: move.color,
                pgnMove: move.pgn
             });
-         }
+         },
+         timed: true
       });
    });
 
