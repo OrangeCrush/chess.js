@@ -53,7 +53,7 @@ define(function(require, exports, module){
       var x = {};
       for(var key in obj) {
          if(obj[key] instanceof SingletonContainer){
-            continue;
+            continue; //way cooler than if guarding whole loop
          }else if(obj[key] instanceof Array){
             x[key] = this.deepCopyAry(obj[key]);
          }else if(obj[key] instanceof Function){
@@ -98,5 +98,17 @@ define(function(require, exports, module){
          x: 7- sqr.x,
          y: 7 - sqr.y
       };
+   }
+
+   /*
+    * Takes an number (str or int)
+    * and pads a zero if the value is less than 10.
+    */
+   exports.padZero = function(num){
+      if(+num < 10){
+         return '0' + num;
+      }else{
+         return num + '';
+      }
    }
 });

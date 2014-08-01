@@ -4,11 +4,24 @@ if(typeof define !== 'function'){
 define(function(require, exports, module){
    var Pieces = require('Piece')();
    var Board = require('Board')();
+   var ChessTimer = require('ChessTimer')();
+   var SingletonContainer = require('SingletonContainer');
    var Utils = require('Utils');
 
    function Game(init){
       this.promote = (init && init.promote) || function(piece){ piece.name = 'Q'; }; //Pass in a function to promote pawns
       this.newGame();
+      this.timed = init.timed || false;
+      if(this.timed){
+         if(!this.sc){
+            this.sc = new SingletonContainer({});
+         }
+         this.sc.timer = new ChessTimer({
+            startTime: 5 * 60,
+            delayTime: 5
+         });
+         this.sc.timer.start();
+      }
    }
 
    Game.prototype.newGame = function(){
@@ -93,6 +106,9 @@ define(function(require, exports, module){
     */
    Game.prototype.validateMove = function(pgnMove, team){
       try{
+         if(!this.validateTime()){
+            return {valid: false, desc: 'Time has run out for ' + this.turn + '.  The Game is Over.'};
+         }
          if(team === this.turn ){
             if(pgnMove === 'O-O-O' || pgnMove === 'O-O'){
                var valid = this.canCastle(pgnMove, team);
@@ -111,7 +127,7 @@ define(function(require, exports, module){
                      var moveSquares = this.getMoveSquaresForPiece(piece, team);
                      if(Utils.isSqrInAry(moveSquares, spot_to)){
                         if(!this.moveResultsInCheck(piece, this.board.squares[spot_to.x][spot_to.y], team)){
-                           return {valid: true, desc:'Go for it kid'}; //As long as moveSqrs fns handle check i think this is O.K.
+                           return {valid: true, desc:'Go for it kid'}; 
                         }else{
                            return {valid: false, desc:"Move would result in check for " + Utils.otherTeam(team)};
                         }
@@ -257,6 +273,9 @@ define(function(require, exports, module){
       this.whiteCheck = this.isCheckForTeam('white');
       this.blackCheck = this.isCheckForTeam('black');
 
+
+      //turn over timer
+      this.clickTimer();
 
       return captured;
    }
@@ -697,6 +716,29 @@ define(function(require, exports, module){
       for(var i = 0; i < teamAry.length; i++){
          each(teamAry[i], this.getValidMovesForPiece(teamAry[i]));
       }
+   }
+
+   /*
+    * Check if the game has a timer before clicking it over
+    */
+   Game.prototype.clickTimer = function(){
+      if(this.timed){
+         this.sc.timer.click();
+      }
+   }
+
+   /*
+    * Returns true if the time for the current teams turn is not
+    * zero or lower than 0.
+    */
+   Game.prototype.validateTime = function(){
+      if(this.timed){
+         if((this.turn === 'white' && this.sc.timer.whiteTime <= 0)
+          ||(this.turn === 'black' && this.sc.timer.blackTime <= 0)){
+            return false;
+         }
+      }
+      return true;
    }
 
    //Expose Game
