@@ -37,7 +37,8 @@ var port = 3000;
 console.log('Express app started on port '+port);
 
 var gm = new GameRoomManager({
-   iosockets: io.sockets
+   iosockets: io.sockets,
+   ioclients: io.clients
 });
 
 //Every 5 seconds gather players and create games
@@ -87,10 +88,6 @@ io.sockets.on('connection', function(socket){
 
    socket.on('chat', function(data){
       io.sockets.in(data.id).emit(data.msg);
-   });
-
-   socket.on('gameOver', function(data){
-      //todo..
    });
 
    /*

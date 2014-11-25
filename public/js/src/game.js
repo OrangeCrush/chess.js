@@ -8,22 +8,54 @@ define(function(require, exports, module){
    var SingletonContainer = require('SingletonContainer');
    var Utils = require('Utils');
 
+   /*
+    * Class to represent a chess game!
+    * See subclasses for ui extension as well as timed components.
+    *  var game = new Game({
+    *     promote: fn(piece)           (decide what to do with piece.name when the pawn reaches the other side)
+    *     gameOverHandler: fn(winner)  (Called when the game is over, with winning team winner)
+    *     timed: <boolean>             (will this game be timed?)
+    *     timeUpHandler fn(team)       (required for timed games. Called when time is up for team.)
+    *     startTime: <int>             (seconds to allow for gameplay)
+    *     delayTime: <int>             (seconds to wait before decrementing startTime each turn)
+    *  });
+    */
    function Game(init){
-      this.promote = (init && init.promote) || function(piece){ piece.name = 'Q'; }; //Pass in a function to promote pawns
+      var self = this;
+      if(!init){
+         throw "Please pass at least {} to Game's constructor";
+      }
+      this.promote = init.promote || function(piece){ piece.name = 'Q'; }; //Pass in a function to promote pawns
       this.newGame();
       this.timed = init.timed || false;
       if(this.timed){
+         if(!init.timeUpHandler){
+            throw "Please provide a timeUpHandler to end the game on a timeout."
+         }
+         this.timeUpHandler = init.timeUpHandler;
          if(!this.sc){
             this.sc = new SingletonContainer({});
          }
+
          this.sc.timer = new ChessTimer({
-            startTime: 5 * 60,
-            delayTime: 5
+            startTime: init.startTime || 5 * 60,
+            delayTime: init.delayTime == undefined ? 5 : init.delayTime,
+            onTimerTick : function(blackTime, whiteTime){
+               if((self.turn === 'black' && blackTime === 0 && whiteTime !== 0) ||
+                  (self.turn === 'white' && whiteTime === 0 && blackTime !== 0)){
+                  console.log('Time is up for ' + self.turn);
+                  self.timeUpHandler(self.turn);
+               }
+            }
          });
          this.sc.timer.start();
       }
    }
 
+   /*
+    * Sets up a new game.
+    * Inits everything appropriately.  Gets called in the constructor.
+    */
    Game.prototype.newGame = function(){
       this.board = new Board();
 
@@ -48,6 +80,9 @@ define(function(require, exports, module){
 
       this.whiteCaptured = [];
       this.blackCaptured = [];
+
+      this.blackCheckMate = false;
+      this.whiteCheckMate = false;
 
       for(var i = 0; i < 8; i++){
 
@@ -107,7 +142,7 @@ define(function(require, exports, module){
    Game.prototype.validateMove = function(pgnMove, team){
       try{
          if(!this.validateTime()){
-            return {valid: false, desc: 'Time has run out for ' + this.turn + '.  The Game is Over.'};
+            return {valid: false, desc: 'Timeout. ' +   + ' wins!'};
          }
          if(team === this.turn ){
             if(pgnMove === 'O-O-O' || pgnMove === 'O-O'){
@@ -273,6 +308,9 @@ define(function(require, exports, module){
       this.whiteCheck = this.isCheckForTeam('white');
       this.blackCheck = this.isCheckForTeam('black');
 
+      this.whiteCheckMate = this.isCheckMateForTeam('white').checkmate;
+      this.blackCheckMate = this.isCheckMateForTeam('black').checkmate;
+
 
       //turn over timer
       this.clickTimer();
@@ -280,6 +318,9 @@ define(function(require, exports, module){
       return captured;
    }
 
+   /*
+    * Get an array of pieces for the given team
+    */
    Game.prototype.teamPieces = function(team){
       return team === 'black' ? this.black : this.white;
    }
@@ -367,21 +408,21 @@ define(function(require, exports, module){
          break;
          case 'N':
             if(Utils.onBoard({x: x + 2, y: y + 1}) && !(this.board.squares[x + 2][y + 1].piece && this.board.squares[x + 2][y + 1].piece.color === team))
-         squares.push(this.board.squares[x + 2][y + 1]);
-         if(Utils.onBoard({x: x + 2, y: y - 1}) && !(this.board.squares[x + 2][y - 1].piece && this.board.squares[x + 2][y - 1].piece.color === team))
-         squares.push(this.board.squares[x + 2][y - 1]);
-         if(Utils.onBoard({x: x - 2, y: y + 1}) && !(this.board.squares[x - 2][y + 1].piece && this.board.squares[x - 2][y + 1].piece.color === team))
-         squares.push(this.board.squares[x - 2][y + 1]);
-         if(Utils.onBoard({x: x - 2, y: y - 1}) && !(this.board.squares[x - 2][y - 1].piece && this.board.squares[x - 2][y - 1].piece.color === team))
-         squares.push(this.board.squares[x - 2][y - 1]);
-         if(Utils.onBoard({x: x + 1, y: y + 2}) && !(this.board.squares[x + 1][y + 2].piece && this.board.squares[x + 1][y + 2].piece.color === team))
-         squares.push(this.board.squares[x + 1][y + 2]);
-         if(Utils.onBoard({x: x + 1, y: y - 2}) && !(this.board.squares[x + 1][y - 2].piece && this.board.squares[x + 1][y - 2].piece.color === team))
-         squares.push(this.board.squares[x + 1][y - 2]);
-         if(Utils.onBoard({x: x - 1, y: y + 2}) && !(this.board.squares[x - 1][y + 2].piece && this.board.squares[x - 1][y + 2].piece.color === team))
-         squares.push(this.board.squares[x - 1][y + 2]);
-         if(Utils.onBoard({x: x - 1, y: y - 2}) && !(this.board.squares[x - 1][y - 2].piece && this.board.squares[x - 1][y - 2].piece.color === team))
-         squares.push(this.board.squares[x - 1][y - 2]);
+               squares.push(this.board.squares[x + 2][y + 1]);
+            if(Utils.onBoard({x: x + 2, y: y - 1}) && !(this.board.squares[x + 2][y - 1].piece && this.board.squares[x + 2][y - 1].piece.color === team))
+               squares.push(this.board.squares[x + 2][y - 1]);
+            if(Utils.onBoard({x: x - 2, y: y + 1}) && !(this.board.squares[x - 2][y + 1].piece && this.board.squares[x - 2][y + 1].piece.color === team))
+               squares.push(this.board.squares[x - 2][y + 1]);
+            if(Utils.onBoard({x: x - 2, y: y - 1}) && !(this.board.squares[x - 2][y - 1].piece && this.board.squares[x - 2][y - 1].piece.color === team))
+               squares.push(this.board.squares[x - 2][y - 1]);
+            if(Utils.onBoard({x: x + 1, y: y + 2}) && !(this.board.squares[x + 1][y + 2].piece && this.board.squares[x + 1][y + 2].piece.color === team))
+               squares.push(this.board.squares[x + 1][y + 2]);
+            if(Utils.onBoard({x: x + 1, y: y - 2}) && !(this.board.squares[x + 1][y - 2].piece && this.board.squares[x + 1][y - 2].piece.color === team))
+               squares.push(this.board.squares[x + 1][y - 2]);
+            if(Utils.onBoard({x: x - 1, y: y + 2}) && !(this.board.squares[x - 1][y + 2].piece && this.board.squares[x - 1][y + 2].piece.color === team))
+               squares.push(this.board.squares[x - 1][y + 2]);
+            if(Utils.onBoard({x: x - 1, y: y - 2}) && !(this.board.squares[x - 1][y - 2].piece && this.board.squares[x - 1][y - 2].piece.color === team))
+               squares.push(this.board.squares[x - 1][y - 2]);
          break;
          case 'K':
             squares = this.marchUntilPiece(piece, {up_down: true, diag: true}, 1);
@@ -732,9 +773,11 @@ define(function(require, exports, module){
     * zero or lower than 0.
     */
    Game.prototype.validateTime = function(){
+      console.log('validating time');
       if(this.timed){
          if((this.turn === 'white' && this.sc.timer.whiteTime <= 0)
           ||(this.turn === 'black' && this.sc.timer.blackTime <= 0)){
+      console.log('time validation failed');
             return false;
          }
       }

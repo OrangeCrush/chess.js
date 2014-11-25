@@ -74,8 +74,10 @@ define(function(require, exports, module){
       this.highlightColor  = init.highlightColor   || 'rgba(255,64,64,0.5)'; //pink
       this.labelColor  = init.labelColor   || 'rgba(255,85,0,1)'; //lime green
 
-      this.sc.timer.onTimerTick = function(){
-         self.drawTime();
+      if(this.timed){
+         this.sc.timer.onTimerTick = function(){
+            self.drawTime();
+         }
       }
 
       this.redrawGame();
@@ -172,15 +174,21 @@ define(function(require, exports, module){
          }else if(this.clickedPiece && (this.perspective === 'white' && Utils.isSqrInAry(this.highlighted, sqr)
             || this.perspective === 'black' && Utils.isSqrInAry(this.highlighted, Utils.flipSqr(sqr)))){//if they clicked on a highlighted sqr and are white
                var customPgn = this.clickedPiece.coordsToString() + '-'  + Utils.coordsToPgnSqr(sqr.x,sqr.y);
-               if(this.clickedPiece.name === 'K'){//Check if the mvoe was a castle, and transform pgn if it was
+               if(this.clickedPiece.name === 'K'){//Check if the move was a castle, and transform pgn if it was
                   customPgn = this.isPgnMoveCastle(this.clickedPiece, customPgn);
                }
-               if(this.validateMove(customPgn, this.turn)){
+               var validMove = this.validateMove(customPgn, this.turn);
+               if(validMove.valid){
                   this.moveCallBack({
                      pgn:customPgn,
                      color: this.turn
                   });
                   this.processMove(customPgn, this.turn);
+               }else{
+                  //bad move, returning
+                  this.redrawGame();
+                  this.drawGameAlert(validMove.desc);
+                  return;
                }
                this.clickedPiece = null;
                this.redrawGame();//clicked off
@@ -384,6 +392,10 @@ define(function(require, exports, module){
          msg = 'Check! (White)';
       }else if(this.blackCheck){
          msg = 'Check! (Black)';
+      }else if(this.timed && this.sc.timer.blackTime <= 0){
+         msg = 'White Wins! (Timeout)';
+      }else if(this.timed && this.sc.timer.whiteTime <= 0){
+         msg = 'Black Wins! (Timeout)';
       }
 
       this.drawGameAlert(msg);

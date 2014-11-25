@@ -78,7 +78,12 @@ require(['socket.io.min', 'CanvasGameBoard'], function(io, CanvasGameBoard){
                pgnMove: move.pgn
             });
          },
-         timed: true
+         timed: true,
+         startTime: 15,
+         delayTime : 5,
+         timeUpHandler:  function(timeUpTeam){
+            alert("Time is up for " + timeUpTeam + ". " +  timeUpTeam === 'black' ? 'white' : 'black' + " wins!");
+         }
       });
    });
 
@@ -93,11 +98,15 @@ require(['socket.io.min', 'CanvasGameBoard'], function(io, CanvasGameBoard){
    });
 
    socket.on('badMove', function(data){
-     //RollBack state of game and display a message promptly yelling       at the user
+     //RollBack state of game and display a message promptly yelling at the user
      console.log('Bad move detected');
+     console.log(data);
    });
 
-   socket.on('closingRoom', function(data){
-      //Idk what to do yet really  
+   /*
+    * Game ended on checkmate or timeout
+    */
+   socket.on('gameOver', function(data){
+      alert("Game Over! (" + data.type  + ")\n" + data.msg + Math.random());
    });
 });

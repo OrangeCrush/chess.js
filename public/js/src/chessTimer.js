@@ -15,7 +15,7 @@ define(function(require, exports, module){
       }
       this.blackTime = init.startTime;
       this.whiteTime = init.startTime;
-      this.delay = init.delayTime
+      this.delay = init.delayTime;
       this.onTimerTick = init.onTimerTick;
       this.turn = 'white';
    }
@@ -35,7 +35,10 @@ define(function(require, exports, module){
             }
          }
          if(self.onTimerTick){//callback for ticks of the timer (useful for callbacks)
-            self.onTimerTick();
+            self.onTimerTick(self.blackTime, self.whiteTime);
+            if(self.blackTime <= 0 || self.whiteTime <= 0){
+               clearInterval(self.timerpid);
+            }
          }
       }, 1000);
    }
