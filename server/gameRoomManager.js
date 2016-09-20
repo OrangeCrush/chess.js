@@ -58,7 +58,7 @@ define(function(require, exports, module){
       var id = this.generateId();
       this.games[id] = {
          game: new Game({
-            timed: true,               //TODO need a way to pass options
+            timed: false,               //TODO need a way to pass options
             delayTime: 5,
             startTime : 15,
             timeUpHandler : function(timeUpTeam){

@@ -78,9 +78,7 @@ require(['socket.io.min', 'CanvasGameBoard'], function(io, CanvasGameBoard){
                pgnMove: move.pgn
             });
          },
-         timed: true,
-         startTime: 15,
-         delayTime : 5,
+         timed: false,
          timeUpHandler:  function(timeUpTeam){
             alert("Time is up for " + timeUpTeam + ". " +  timeUpTeam === 'black' ? 'white' : 'black' + " wins!");
          }
