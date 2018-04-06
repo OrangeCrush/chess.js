@@ -36,7 +36,7 @@ require.config({
    }
 });
 require(['socket.io.min', 'CanvasGameBoard'], function(io, CanvasGameBoard){
-   var socket = io('http://localhost:3000');
+   var socket = io(window.location.origin);
    var canvasGame;
    var connectedAt;
 
