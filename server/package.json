@@ -5,6 +5,7 @@
       "socket.io": "latest",
       "socket.io-client": "latest",
       "amdefine": "latest",
-      "requirejs": "latest"
+      "requirejs": "latest",
+      "body-parser": "latest"
    }
 }

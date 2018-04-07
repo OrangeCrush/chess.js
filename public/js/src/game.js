@@ -261,8 +261,8 @@ define(function(require, exports, module){
          captured = this.movePiece(sqr_from, sqr_to);
 
          if(captured){
-               var capary = team === 'black' ? this.blackCaptured : this.whiteCaptured;
-               capary.push(captured);
+             var capary = team === 'black' ? this.blackCaptured : this.whiteCaptured;
+             capary.push(captured);
          }
 
          if(this.canPromote(sqr_to.piece)){
@@ -782,6 +782,13 @@ define(function(require, exports, module){
          }
       }
       return true;
+   }
+
+   /*
+    * AI helper
+    */
+   Game.prototype.isGameOver = function(){
+     return this.whiteCheckMate || this.blackCheckMate;
    }
 
    //Expose Game

@@ -15,6 +15,7 @@
         <link rel="stylesheet" href="css/normalize.css">
         <link rel="stylesheet" href="css/main.css">
         <link rel="stylesheet" href="css/styles.css">
+        <link rel="stylesheet" href="css/bootstrap.min.css">
         <script src="js/vendor/modernizr-2.6.2.min.js"></script>
     </head>
     <body>
@@ -22,8 +23,17 @@
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
+        <div id="gamePrompt" class='center' style="max-width:128px; margin-top: 40px;">
+          <button id="multiButton" type="button" style="margin-bottom: 10px;" class="btn btn-dark btn-lg">Multiplayer Game</button>
+          <button id="singleButton" type="button" class="btn btn-dark btn-lg">Face the Computer</button>
+          <select id="difficulty">
+            <option value="random">Easy</option>
+            <option value="capturer">Medium</option>
+          </select>
+        </div>
+
         <noscript>Please enable javascript</noscript>
-        <div id='waitingScreen' class='center' style='max-width:512px; margin-top: 10%;'>
+        <div id='waitingScreen' class='center' style='display:none; max-width:512px; margin-top: 10%;'>
            <img class='center' src='img/loading.gif'></img>
            <p id='textAnimation'>Please wait while we match you to another player.<p>
         </div>

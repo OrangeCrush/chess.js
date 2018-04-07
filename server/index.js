@@ -12,7 +12,10 @@ requirejs.config({
       Utils: '../public/js/src/utils',
       SingletonContainer: '../public/js/src/singletonContainer',
       ChessTimer: '../public/js/src/chessTimer',
-      GameRoomManager: 'gameRoomManager'
+      GameRoomManager: 'gameRoomManager',
+      AIGameManager: 'AIGameManager',
+      RandomAI: './ai/RandomAI',
+      CapturerAI: './ai/CapturerAI'
    },
    baseUrl: __dirname,
    nodeRequire: require
@@ -23,8 +26,12 @@ var express = require('express'),
     server = require('http').createServer(app),
     io = require('socket.io').listen(server);
 
+var bodyParser = require('body-parser');
+app.use(bodyParser.json());
+
 
 var GameRoomManager = requirejs('GameRoomManager');
+var AIGameManager = requirejs('AIGameManager');
 
 /**
  * Main application entry file.
@@ -39,6 +46,13 @@ console.log('Express app started on port '+port);
 var gm = new GameRoomManager({
    iosockets: io.sockets,
    ioclients: io.clients
+});
+
+// TODO add ai class here
+var aiMan = new AIGameManager({
+  ai: function() {
+    
+  }
 });
 
 //Every 5 seconds gather players and create games
@@ -75,7 +89,7 @@ io.sockets.on('connection', function(socket){
    socket.emit('connected', {timestamp: new Date()});
 
    //Places the player in the game queue and begins socket communication
-   gm.joinGame(socket);
+   //gm.joinGame(socket); disable multiplayer for now
 
    socket.on('watch', function(data){
       //todo..
@@ -98,6 +112,26 @@ io.sockets.on('connection', function(socket){
       console.log(socket.id + ' is down.');
       gm.playerDisconnected(socket);
    });
+
+
+  // Single player events
+  socket.on('playerMove', function(data) {
+    var turnData = aiMan.processMove(data.gameId, data.pgnMove)
+    socket.emit('cpuMove', {
+      'cpuMove': turnData.cpuMove,
+      'color'  : turnData.color
+    });
+  });
+});
+
+// Single Player logic
+app.get('/game/:gameId', function(req, res){
+  res.json(aiMan.getGame(req.params.gameId));
+});
+
+app.post('/newgame', function(req, res) {
+  var id = aiMan.setupNewGame(req.body.playerTeam, req.body.ai);
+  res.json({gameId: id});
 });
 
 server.listen(port);
