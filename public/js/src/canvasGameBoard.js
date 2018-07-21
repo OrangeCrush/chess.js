@@ -386,8 +386,11 @@ define(function(require, exports, module){
    CanvasGameBoard.prototype.pickAndDrawGameAlert = function(){
       var msg = this.turn + "'s move.";
       
-      if(this.isCheckMateForTeam(this.turn).checkmate){
+      var gameStatus = this.isCheckMateForTeam(this.turn);
+      if(gameStatus.checkmate){
          msg = 'Checkmate! (' + this.turn + ')';
+      }else if(gameStatus.stalemate){
+         msg = 'Stalemate! (' + this.turn + ')';
       }else if(this.whiteCheck){
          msg = 'Check! (White)';
       }else if(this.blackCheck){

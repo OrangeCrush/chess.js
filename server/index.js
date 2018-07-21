@@ -69,7 +69,9 @@ setInterval(function(){
    }
 
    var numGames = Math.floor(queue.length / 2);
-   console.log('Starting ' + numGames + ' new games');
+   if(numGames > 0){
+     console.log('Starting ' + numGames + ' new games');
+   }
    for(var i = 0; i < numGames; i++){
       var gameid = gm.generateNewGame(queue.shift(), queue.shift(), null);
       console.log('Created game with id:' +  gameid); //TODO idk how to handle game options yet
@@ -80,8 +82,10 @@ setInterval(function(){
       gm.waiting[queue[0].id] = queue[0];//push back the odd player out
    }
 
-   console.log('Printing Waiting queue:')
-   console.log(Object.keys(gm.waiting));
+   if(Object.keys(gm.waiting) > 0){
+     console.log('Printing Waiting queue:')
+     console.log(Object.keys(gm.waiting));
+   }
 }, 5000);
 
 io.sockets.on('connection', function(socket){

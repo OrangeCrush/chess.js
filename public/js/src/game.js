@@ -83,6 +83,8 @@ define(function(require, exports, module){
 
       this.blackCheckMate = false;
       this.whiteCheckMate = false;
+      this.whiteStaleMate = false;
+      this.blackStaleMate = false;
 
       for(var i = 0; i < 8; i++){
 
@@ -141,7 +143,7 @@ define(function(require, exports, module){
     */
    Game.prototype.validateMove = function(pgnMove, team){
       try{
-         if(!this.validateTime()){
+         if(this.timed && !this.validateTime()){
             return {valid: false, desc: 'Timeout. ' +   + ' wins!'};
          }
          if(team === this.turn ){
@@ -308,9 +310,14 @@ define(function(require, exports, module){
       this.whiteCheck = this.isCheckForTeam('white');
       this.blackCheck = this.isCheckForTeam('black');
 
-      this.whiteCheckMate = this.isCheckMateForTeam('white').checkmate;
-      this.blackCheckMate = this.isCheckMateForTeam('black').checkmate;
+      var whiteGameStatus = this.isCheckMateForTeam('white');
+      var blackGameStatus = this.isCheckMateForTeam('black');
 
+      this.whiteCheckMate = whiteGameStatus.checkmate
+      this.blackCheckMate = blackGameStatus.checkmate
+
+      this.whiteStaleMate = whiteGameStatus.stalemate;
+      this.blackStaleMate = blackGameStatus.stalemate;
 
       //turn over timer
       this.clickTimer();
@@ -333,7 +340,11 @@ define(function(require, exports, module){
     *
     * Also updates this.king, and removes captured piece from the games array
     */
-   Game.prototype.movePiece = function(sqr_from, sqr_to){
+   Game.prototype.movePiece = function(sqr_from, sqr_to, hack){
+     if(hack){
+      console.log("in Move Piece for checking check");
+      console.log("From " + JSON.stringify(sqr_from) + " to " + JSON.stringify(sqr_to));
+     }
       var captured = sqr_to.piece;
       sqr_to.piece = sqr_from.piece;
       sqr_to.occupied = true;
@@ -364,6 +375,21 @@ define(function(require, exports, module){
                return !piece.equals(captured);
             });
          }
+      }
+
+      if(hack){
+        console.log("End of Move Piece");
+        console.log("sqrFrom : " + JSON.stringify(sqr_from));
+        console.log("sqrTo   : " + JSON.stringify(sqr_to));
+        console.log(this.board.toString());
+        console.log("White pieces:");
+        for (var i = 0, len = this.white.length; i < len; i++) {
+          console.log(JSON.stringify(this.white[i]));
+        }
+        console.log("Black pieces:");
+        for (var i = 0, len = this.black.length; i < len; i++) {
+          console.log(JSON.stringify(this.black[i]));
+        }
       }
 
       return captured;
@@ -575,12 +601,22 @@ define(function(require, exports, module){
     * Predicate to see whether or not team team is in check
     * team ::= /(black|white)/
     */
-   Game.prototype.isCheckForTeam = function(team){
+   Game.prototype.isCheckForTeam = function(team, hack){
       //Get opposite (attacking) team pieces
       var pieces = team === 'white' ? this.black : this.white;
       var king   = team === 'white' ? this.whiteKing : this.blackKing;
+      if(hack){
+        console.log("In is check for team");
+        console.log(this.board.toString());
+      }
       for(var i = 0 ; i < pieces.length; i++){
+        if(hack){
+          console.log("Checking if " + pieces[i] + " at " + pieces[i].coordsToString() + " can capture king at " + king.coordsToString());
+        }
          if(this.canPieceCapture(pieces[i], king)){
+           if(hack){
+           console.log("!!!!!!!!!" + pieces[i] + " at " + pieces[i].coordsToString() + " can capture king at " + king.coordsToString());
+           }
             return true;
          }
       }
@@ -590,10 +626,18 @@ define(function(require, exports, module){
    /*
     * Make a temp game, move the piece, see if there is check.
     */
-   Game.prototype.moveResultsInCheck = function(piece, sqr_move_to, team){
+   Game.prototype.moveResultsInCheck = function(piece, sqr_move_to, team, hack){
+     if(hack){
+       console.log("INSIDE RESULTS IN CHECK");
+       console.log(piece);
+       console.log(sqr_move_to);
+       console.log(team);
+     }
       var future_game = Utils.deepCopyObj(this);
-      future_game.movePiece(future_game.getSqrForPiece(piece), future_game.board.squares[sqr_move_to.x][sqr_move_to.y]);
-      return future_game.isCheckForTeam(team);
+
+      future_game.movePiece(future_game.getSqrForPiece(piece), future_game.board.squares[sqr_move_to.x][sqr_move_to.y], hack);
+
+      return future_game.isCheckForTeam(team, hack);
    }
 
    /*
@@ -788,7 +832,29 @@ define(function(require, exports, module){
     * AI helper
     */
    Game.prototype.isGameOver = function(){
-     return this.whiteCheckMate || this.blackCheckMate;
+     return this.whiteCheckMate || this.blackCheckMate || this.whiteStaleMate || this.blackStaleMate;
+   }
+
+   /*
+    * For a given pgnMove, return the piece that would be captured, or null if nothing would be captured
+    */
+   Game.prototype.whatWouldMoveCapture = function(pgnMove){
+     if(pgnMove !== 'O-O' && pgnMove !== 'O-O-O'){
+       var to_sqr = Utils.pgnSqrToCoords(pgnMove.split('-')[1]);
+       if(this.getPieceFromCoord(to_sqr.x, to_sqr.y)){
+         return this.getPieceFromCoord(to_sqr.x, to_sqr.y).name;
+       }
+     } 
+     return null;
+   }
+
+   /*
+    * Predicate to determine if a move would result in checkmate
+    */
+   Game.prototype.moveResultsInCheckMate = function(piece, sqr_move_to, team){
+     var future_game = Utils.deepCopyObj(this);
+     future_game.movePiece(future_game.getSqrForPiece(piece), future_game.board.squares[sqr_move_to.x][sqr_move_to.y]);
+     return future_game.isCheckMateForTeam(team).checkmate;
    }
 
    //Expose Game
